@@ -143,15 +143,13 @@ If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remov
    ./dash-dash-dash -config path/to/config.yml
    ```
 
-**Open** [http://localhost:8080](http://localhost:8080) (or the host/port set in `config.yml` under `server`).
-
 ##
 
-## Usage
+### Usage
 
 Defaults to **http://localhost:8080**. Host and port are set in `config.yml` under `server`.
 
----
+##
 
 ## Configuration
 
@@ -178,7 +176,7 @@ Paths are relative to the file that contains the `$include`. Recursion limit: 20
 
 Config file changes are applied without restart; reload the page. `.env` changes require a restart.
 
----
+##
 
 ## Config reference
 
@@ -197,7 +195,7 @@ Config file changes are applied without restart; reload the page. `.env` changes
 - **Page:** `name`, `slug`, `hide-desktop-navigation`, `center-vertically`, `width` (default | wide | slim), optional `head-widgets`.
 - **Column:** `size: small` or `full`; each has a `widgets` list.
 
----
+##
 
 ## Widgets
 
@@ -278,7 +276,7 @@ Icon: empty = favicon; or `si:`, `di:`, `mdi:`, `sh:` + name, or URL.
 
 [Caching and refresh](#caching-and-refresh) for cache TTLs. Full example: [config.example.full.yml](quick-start/config.example.full.yml).
 
----
+##
 
 ## Caching and refresh
 
@@ -293,7 +291,7 @@ Background job refreshes due widgets every 5 minutes. Static assets: 24 h; HTML/
 
 **Health:** `GET /api/healthz` returns 200 when the app is up.
 
----
+##
 
 ## CLI
 
@@ -311,7 +309,7 @@ Background job refreshes due widgets every 5 minutes. Static assets: 24 h; HTML/
 ./dash-dash-dash config:print
 ```
 
----
+##
 
 ## Troubleshooting
 
@@ -322,7 +320,7 @@ Background job refreshes due widgets every 5 minutes. Static assets: 24 h; HTML/
 | .env not applied | Restart the container; env is read at start. |
 | Config error on start | Run `./dash-dash-dash config:validate`; use `config:print` for the merged config. |
 
----
+##
 
 ## Credits and license
 
