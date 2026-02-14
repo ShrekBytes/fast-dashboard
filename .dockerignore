@@ -1,5 +1,6 @@
 # Ignore all by default; only include what's needed for the build
 *
+!.
 !/internal/
 !/go.mod
 !/go.sum
