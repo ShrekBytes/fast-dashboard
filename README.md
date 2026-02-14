@@ -12,7 +12,7 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 
 - [Installation](#installation)
   - [Recommended: Docker Compose](#recommended-docker-compose)
-  - [Docker / Podman by hand](#docker--podman-by-hand)
+  - [Docker / Podman Manual](#docker--podman-manual)
   - [Podman quadlet](#podman-quadlet)
   - [Run with Go (no Docker)](#run-with-go-no-docker)
 - [Usage](#usage)
@@ -107,7 +107,7 @@ If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an 
    ```bash
    mkdir -p ~/.config/containers/systemd
    ```
-   Copy [quick-start/dash-dash-dash/dash-dash-dash.container](path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container) to `~/.config/containers/systemd/dash-dash-dash.container`
+   Copy [quick-start/dash-dash-dash/dash-dash-dash.container](quick-start/dash-dash-dash/dash-dash-dash.container) to `~/.config/containers/systemd/dash-dash-dash.container`
    
 3. **Reload and start:**
 
