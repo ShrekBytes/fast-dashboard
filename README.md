@@ -353,3 +353,4 @@ Static assets: 24 h; HTML/API: no-cache.
 Based on [Glance](https://github.com/glanceapp/glance) by svenstaro. Weather: [Open-Meteo](https://open-meteo.com/). Icons: [DuckDuckGo](https://icons.duckduckgo.com/), [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 
 **License:** AGPL-3.0. See [LICENSE](LICENSE).
+
