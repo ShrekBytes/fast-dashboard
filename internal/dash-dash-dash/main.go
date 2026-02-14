@@ -1,4 +1,4 @@
-package fastdashboard
+package dashdashdash
 
 import (
 	"fmt"

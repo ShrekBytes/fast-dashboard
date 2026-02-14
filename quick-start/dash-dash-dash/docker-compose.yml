@@ -1,7 +1,7 @@
 services:
-  fast-dashboard:
-    image: ghcr.io/shrekbytes/fast-dashboard:latest
-    container_name: fast-dashboard
+  dash-dash-dash:
+    image: ghcr.io/shrekbytes/dash-dash-dash:latest
+    container_name: dash-dash-dash
 
     # Restart behavior
     restart: on-failure

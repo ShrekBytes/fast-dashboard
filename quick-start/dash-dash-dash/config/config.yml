@@ -1,4 +1,4 @@
-# Fast Dashboard - minimal config example
+# DASH-DASH-DASH - minimal config example
 # Copy to config.yml and customize
 
 server:
@@ -7,7 +7,7 @@ server:
   base-url: "http://localhost:8080"
 
 branding:
-  app-name: "Fast Dashboard"
+  app-name: "DASH-DASH-DASH"
   # Footer text or HTML (e.g. links); leave empty or omit to hide footer
   footer: "ShrekBytes"
 

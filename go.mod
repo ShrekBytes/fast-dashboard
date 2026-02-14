@@ -1,4 +1,4 @@
-module fast-dashboard
+module dash-dash-dash
 
 go 1.24.0
 

@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"fast-dashboard/internal/fastdashboard"
+	"dash-dash-dash/internal/dash-dash-dash"
 )
 
 func main() {
-	os.Exit(fastdashboard.Main())
+	os.Exit(dashdashdash.Main())
 }

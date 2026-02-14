@@ -1,4 +1,4 @@
-package fastdashboard
+package dashdashdash
 
 import (
 	"bytes"
@@ -123,7 +123,7 @@ func newApplication(c *config) (*application, error) {
 	)
 
 	if config.Branding.AppName == "" {
-		config.Branding.AppName = "Fast Dashboard"
+		config.Branding.AppName = "DASH-DASH-DASH"
 	}
 
 	if config.Branding.AppIconURL == "" {

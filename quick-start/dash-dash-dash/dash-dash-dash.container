@@ -1,22 +1,22 @@
 [Unit]
-Description=Fast Dashboard
+Description=DASH-DASH-DASH
 After=network-online.target
 Wants=network-online.target
 
 [Container]
-Image=ghcr.io/shrekbytes/fast-dashboard:latest
-ContainerName=fast-dashboard
+Image=ghcr.io/shrekbytes/dash-dash-dash:latest
+ContainerName=dash-dash-dash
 AutoUpdate=registry
 
 # change ip and port from config.yml
 Network=host
 
 # Environment file (create .env in the folder if you need secrets in config)
-EnvironmentFile=%h/fast-dashboard/.env
+EnvironmentFile=%h/dash-dash-dash/.env
 
 # Persistent storage (same layout as compose: one folder with config/ and optional assets/)
-Volume=%h/fast-dashboard/config:/app/config:Z
-Volume=%h/fast-dashboard/assets:/app/assets:Z
+Volume=%h/dash-dash-dash/config:/app/config:Z
+Volume=%h/dash-dash-dash/assets:/app/assets:Z
 Volume=/etc/localtime:/etc/localtime:ro
 
 # Port mapping (will not work when on Network=host)

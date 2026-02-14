@@ -1,4 +1,4 @@
-package fastdashboard
+package dashdashdash
 
 import (
 	"flag"
@@ -33,7 +33,7 @@ func parseCliOptions() (*cliOptions, error) {
 
 	flags := flag.NewFlagSet("", flag.ExitOnError)
 	flags.Usage = func() {
-		fmt.Println("Usage: fast-dashboard [options] command")
+		fmt.Println("Usage: dash-dash-dash [options] command")
 
 		fmt.Println("\nOptions:")
 		flags.PrintDefaults()

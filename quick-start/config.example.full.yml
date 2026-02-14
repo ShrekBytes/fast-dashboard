@@ -1,4 +1,4 @@
-# Fast Dashboard – full configuration reference
+# DASH-DASH-DASH – full configuration reference
 # Every section, widget, and parameter documented. Use as config template or docs.
 # Copy to config.yml and remove/comment what you don't need.
 
@@ -27,8 +27,8 @@ theme:
   # custom-css-file: "https://example.com/extra.css"   # optional; extra CSS URL
 
 branding:
-  app-name: "Fast Dashboard"
-  footer: "Powered by Fast Dashboard" # plain text or HTML; empty or omit to hide
+  app-name: "DASH-DASH-DASH"
+  footer: "Powered by DASH-DASH-DASH" # plain text or HTML; empty or omit to hide
   # logo-text: ""                     # optional
   # logo-url: ""                      # optional
   # favicon-url: ""                   # optional; /favicon.ico redirects here

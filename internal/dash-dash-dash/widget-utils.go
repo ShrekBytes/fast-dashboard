@@ -1,4 +1,4 @@
-package fastdashboard
+package dashdashdash
 
 import (
 	"crypto/tls"
@@ -39,7 +39,7 @@ type requestDoer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-var userAgentString = "FastDashboard/" + buildVersion
+var userAgentString = "dash-dash-dash/" + buildVersion
 
 func decodeJsonFromRequest[T any](client requestDoer, request *http.Request) (T, error) {
 	var result T

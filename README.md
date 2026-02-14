@@ -1,10 +1,10 @@
-# Fast Dashboard
+# DASH-DASH-DASH
 
 A minimal, fast dashboard for your browser new-tab or home page. Clock, weather, search, bookmarks, to-do, service checks, RSS—whatever you want. Single binary or one container, no fuss.
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
-![Fast Dashboard Preview](quick-start/screenshots/preview.png) 
+![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png) 
 
 ---
 
@@ -47,7 +47,7 @@ A minimal, fast dashboard for your browser new-tab or home page. Clock, weather,
 Download the ready-to-use folder (config + `.env` + `docker-compose.yml`), then start with Docker. One copy-paste.
 
 ```bash
-curl -sL https://github.com/ShrekBytes/fast-dashboard/archive/refs/heads/main.tar.gz | tar xz && cd fast-dashboard-main/quick-start/fast-dashboard && docker compose up -d
+curl -sL https://github.com/ShrekBytes/dash-dash-dash/archive/refs/heads/main.tar.gz | tar xz && cd dash-dash-dash-main/quick-start/dash-dash-dash && docker compose up -d
 ```
 
 You get a folder with `config/`, `.env`, and `docker-compose.yml`. The app runs in the background.
@@ -60,18 +60,18 @@ You get a folder with `config/`, `.env`, and `docker-compose.yml`. The app runs 
 
 ### Docker / Podman by hand
 
-Use the image `ghcr.io/shrekbytes/fast-dashboard:latest`. You need a folder with `config.yml` (and optionally `.env`). Mount that folder at `/app/config` and pass the env file if used.
+Use the image `ghcr.io/shrekbytes/dash-dash-dash:latest`. You need a folder with `config.yml` (and optionally `.env`). Mount that folder at `/app/config` and pass the env file if used.
 
 Example (Docker):
 
 ```bash
-mkdir -p ~/fast-dashboard/config
-# put config.yml in ~/fast-dashboard/config, .env in ~/fast-dashboard
-docker run -d --name fast-dashboard --restart on-failure \
+mkdir -p ~/dash-dash-dash/config
+# put config.yml in ~/dash-dash-dash/config, .env in ~/dash-dash-dash
+docker run -d --name dash-dash-dash --restart on-failure \
   --network host \
-  -v ~/fast-dashboard/config:/app/config:Z \
-  -v ~/fast-dashboard/.env:/app/.env:ro \
-  ghcr.io/shrekbytes/fast-dashboard:latest
+  -v ~/dash-dash-dash/config:/app/config:Z \
+  -v ~/dash-dash-dash/.env:/app/.env:ro \
+  ghcr.io/shrekbytes/dash-dash-dash:latest
 ```
 
 The app reads `config.yml` from `/app/config/config.yml` inside the container.
@@ -80,27 +80,27 @@ The app reads `config.yml` from `/app/config/config.yml` inside the container.
 
 ### Podman quadlet
 
-The repo includes `quick-start/fast-dashboard/fast-dashboard.container` for Podman quadlet. It expects the dashboard data at **`~/fast-dashboard`**: that folder should contain `.env`, `config/`, and optionally `assets/`.
+The repo includes `quick-start/dash-dash-dash/dash-dash-dash.container` for Podman quadlet. It expects the dashboard data at **`~/dash-dash-dash`**: that folder should contain `.env`, `config/`, and optionally `assets/`.
 
-1. Copy or symlink the `quick-start/fast-dashboard` folder to `~/fast-dashboard`.
-2. Copy the container file to your quadlet directory, e.g. `~/.config/containers/containers/fast-dashboard.container`.
-3. Run `podman generate systemd --new --name fast-dashboard` or let your system manage the unit; the container file uses `AutoUpdate=registry`.
+1. Copy or symlink the `quick-start/dash-dash-dash` folder to `~/dash-dash-dash`.
+2. Copy the container file to your quadlet directory, e.g. `~/.config/containers/containers/dash-dash-dash.container`.
+3. Run `podman generate systemd --new --name dash-dash-dash` or let your system manage the unit; the container file uses `AutoUpdate=registry`.
 
 ---
 
 ### Run with Go (no Docker)
 
-You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy from [config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml) and edit), then:
+You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy from [config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml) and edit), then:
 
 ```bash
-go build -o fast-dashboard .
-./fast-dashboard
+go build -o dash-dash-dash .
+./dash-dash-dash
 ```
 
 Or specify a config file:
 
 ```bash
-go build -o fast-dashboard . && ./fast-dashboard -config config.example.yml
+go build -o dash-dash-dash . && ./dash-dash-dash -config config.example.yml
 ```
 
 ---
@@ -113,7 +113,7 @@ After installation, open **http://localhost:8080** (or the host/port you set in 
 
 ## Configuration
 
-All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/fast-dashboard/config/config.yml`.
+All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/dash-dash-dash/config/config.yml`.
 
 ### Config file location
 
@@ -206,7 +206,7 @@ Widgets are listed under `pages[].columns[].widgets`. Each widget has `type` and
 - **Options:** `title`, `style: list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2`, `limit`, `collapse-after` (-1 to disable), `preserve-order`, `single-line-titles`, optional `thumbnail-height`, `card-height`, `feeds`. Each feed: `url`, optional `title`, `limit` (0 = use widget limit), `hide-categories`, `hide-description`, `item-link-prefix`, `headers`.
 - Fetched and cached; see [Caching and refresh](#caching-and-refresh).
 
-For every option and example, see **[config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml)**.
+For every option and example, see **[config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml)**.
 
 ---
 
@@ -240,9 +240,9 @@ When running the binary (Go):
 Example:
 
 ```bash
-./fast-dashboard -config /etc/fast-dashboard/config.yml
-./fast-dashboard config:validate
-./fast-dashboard config:print
+./dash-dash-dash -config /etc/dash-dash-dash/config.yml
+./dash-dash-dash config:validate
+./dash-dash-dash config:print
 ```
 
 ---
@@ -254,7 +254,7 @@ Example:
 | Port already in use | Change `server.port` in config (e.g. to 8081) and restart. With Docker host networking, nothing else should use that port on the host. |
 | Config changes not visible | Ensure you’re editing the file mounted at `/app/config/config.yml` (containers) or the file passed with `-config` (binary). Save the file and refresh the browser; hot reload should pick it up. |
 | .env not applied | Restart the container after changing `.env`; env is read at start. |
-| Config error on start | Run `./fast-dashboard config:validate` (or the binary with `config:validate`) to see validation errors. Use `config:print` to see the merged config. |
+| Config error on start | Run `./dash-dash-dash config:validate` (or the binary with `config:validate`) to see validation errors. Use `config:print` to see the merged config. |
 
 ---
 
