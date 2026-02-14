@@ -90,7 +90,7 @@ The repo includes `quick-start/dash-dash-dash/dash-dash-dash.container` for Podm
 
 ### Run with Go (no Docker)
 
-You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy from [config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml) and edit), then:
+You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy [quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml) and edit), then:
 
 ```bash
 go build -o dash-dash-dash .
@@ -113,7 +113,7 @@ After installation, open **http://localhost:8080** (or the host/port you set in 
 
 ## Configuration
 
-All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/dash-dash-dash/config/config.yml`.
+All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/dash-dash-dash/config/config.yml`.
 
 ### Config file location
 
@@ -206,7 +206,7 @@ Widgets are listed under `pages[].columns[].widgets`. Each widget has `type` and
 - **Options:** `title`, `style: list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2`, `limit`, `collapse-after` (-1 to disable), `preserve-order`, `single-line-titles`, optional `thumbnail-height`, `card-height`, `feeds`. Each feed: `url`, optional `title`, `limit` (0 = use widget limit), `hide-categories`, `hide-description`, `item-link-prefix`, `headers`.
 - Fetched and cached; see [Caching and refresh](#caching-and-refresh).
 
-For every option and example, see **[config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/config.example.full.yml)**.
+For every option and example, see **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)**.
 
 ---
 
