@@ -167,45 +167,179 @@ Config file changes are applied without restart; reload the page. `.env` changes
 
 ## Widgets
 
-Defined under `pages[].columns[].widgets`. Each has `type` and type-specific options. Common options (where supported): `title`, `hide-header`, `css-class`, `cache` (e.g. `1m`, `5m`, `1h`).
+Widgets live under `pages[].columns[].widgets`. Each widget has a **`type`** and type-specific options.
+
+| Widget type   | Description |
+|---------------|-------------|
+| `clock`       | Local time and optional extra timezones |
+| `calendar`    | Month calendar view |
+| `weather`     | Current conditions and hourly forecast (Open-Meteo, no API key) |
+| `ip-address`  | Hostname, local IP, optional public IP and country |
+| `to-do`       | Client-side task list (localStorage) |
+| `search`      | Search bar and URL bar; bangs for custom shortcuts |
+| `monitor`     | Service health checks with response time and uptime history |
+| `bookmarks`   | Groups of links with optional icons and colors |
+| `rss`         | Aggregated feeds with multiple layout styles |
+
+**Common options** (all widgets):
+
+| Option | Description |
+|--------|-------------|
+| `title` | Widget heading (overrides default) |
+| `hide-header` | Hide the widget title bar |
+| `css-class` | Extra CSS class on the widget container |
+| `cache` | Override refresh interval for data widgets (e.g. `1m`, `5m`, `1h`) |
+
+---
 
 ### Clock
 
-`hour-format: 12h | 24h`, `timezones` (list of `timezone` + `label`). Local time plus optional extra timezones.
+| Option | Description |
+|--------|-------------|
+| `hour-format` | `12h` or `24h` (default: `24h`) |
+| `timezones` | List of `timezone` + `label` (e.g. `America/New_York`, `Europe/London`) |
+
+---
 
 ### Calendar
 
-`first-day-of-week` (e.g. `monday`, `sunday`). Month view.
+| Option | Description |
+|--------|-------------|
+| `first-day-of-week` | `monday`, `tuesday`, … `sunday` (default: `monday`) |
+
+---
 
 ### Weather
 
-`location` (e.g. `"City, Country"`), `units: metric | imperial`, `hour-format`, `hide-location`, `show-area-name`. Uses Open-Meteo; no API key. Current conditions and hourly forecast.
+| Option | Description |
+|--------|-------------|
+| `location` | **Required.** Place name, e.g. `"City, Country"` or `"City, Area, Country"` ([Open-Meteo](https://open-meteo.com/), no API key) |
+| `units` | `metric` or `imperial` (default: `metric`) |
+| `hour-format` | `12h` or `24h` |
+| `hide-location` | Hide the location label (default: `false`) |
+| `show-area-name` | Show administrative area in label (default: `false`) |
+
+---
 
 ### IP address
 
-`public-url`: omit = default (ipinfo.io); set to `""` to hide. Optional `interfaces` (e.g. `[wlo1, eth0]`). Shows hostname, local IP, and optionally public IP and country.
+| Option | Description |
+|--------|-------------|
+| `public-url` | Omit = use default (ipinfo.io). Set to `""` to hide public IP. Set to a URL for a custom endpoint (plain-text IP; country from second request if needed). |
+| `interfaces` | Optional list (e.g. `[wlo1, eth0]`). If set, only show local IP when the default route interface is in this list. |
+
+---
 
 ### To-do
 
-`id` (localStorage key; different ids = separate lists). Client-side only; data stays in the browser.
+| Option | Description |
+|--------|-------------|
+| `id` | **Required.** localStorage key. Use different `id` values for separate lists. Data stays in the browser. |
+
+---
 
 ### Search
 
-`search-engine` (e.g. `duckduckgo`, `google`, `bing`, or URL with `{QUERY}`), `placeholder`, `autofocus`, `new-tab`, `target`, `bangs` (list of `shortcut`, `title`, `url` with `{QUERY}`). Single bar: URL or search; bangs (e.g. `!yt`) open custom URLs.
+| Option | Description |
+|--------|-------------|
+| `search-engine` | `duckduckgo`, `google`, `bing`, `perplexity`, `kagi`, `startpage`, or a URL containing `{QUERY}` (default: `duckduckgo`) |
+| `placeholder` | Input placeholder text (default: "Search or enter URL…") |
+| `autofocus` | Focus the input on load (default: `false`) |
+| `new-tab` | Open results in a new tab (default: `false`) |
+| `target` | Link target, e.g. `_blank` (default: `_blank` when `new-tab` is used) |
+| `bangs` | List of `shortcut`, `title`, `url`. Use `{QUERY}` in `url`; bangs (e.g. `!yt query`) open the URL with query substituted. |
+
+---
 
 ### Service monitor
 
-`title`, `style: "" | compact`, `show-failing-only`, `sites` (list). Each site: `title`, `url`, `icon` (e.g. `si:docker` or full URL), `same-tab`, optional `check-url`, `allow-insecure`, `timeout`, `error-url`, `alt-status-codes`, `basic-auth`. Health checks with response time and uptime dots (last 10). Default timeout 3s.
+| Option | Description |
+|--------|-------------|
+| `title` | Widget title (default: "Monitor") |
+| `style` | `""` (default) or `compact` |
+| `show-failing-only` | When `true`, only show sites that are currently failing (default: `false`) |
+| `sites` | List of sites (see table below) |
+
+**Per site:**
+
+| Option | Description |
+|--------|-------------|
+| `title` | Display name |
+| `url` | Page URL (and default health-check URL) |
+| `icon` | Empty = no icon; `si:name`, `di:name`, `mdi:name`, `sh:name`, or full URL (e.g. `si:docker`) |
+| `same-tab` | Open link in same tab (default: `false`) |
+| `check-url` | URL used for health check (default: `url`) |
+| `allow-insecure` | Skip TLS verification for the check |
+| `timeout` | Check timeout, e.g. `5s`, `2m` (default: `3s`) |
+| `error-url` | Link when the site is down (e.g. status page) |
+| `alt-status-codes` | HTTP codes to treat as success (e.g. `[301, 302]`) |
+| `basic-auth` | `username` and `password` for the check (supports `secret:name`) |
+
+---
 
 ### Bookmarks
 
-`title`, `groups`. Each group: `title`, optional `color` (HSL), `same-tab`, `links`. Each link: `title`, `url`, optional `icon` (empty = favicon; or `si:name`, URL), `description`, `same-tab`, `target`. Icons: `si:`, `di:`, `mdi:`, `sh:` or full URL.
+| Option | Description |
+|--------|-------------|
+| `title` | Widget title (default: "Bookmarks") |
+| `groups` | List of groups (see tables below) |
+
+**Per group:**
+
+| Option | Description |
+|--------|-------------|
+| `title` | Group heading |
+| `color` | Optional HSL (e.g. `"200 60 50"`) |
+| `same-tab` | Open links in same tab (default: `false`) |
+| `hide-arrow` | Hide arrow on links |
+| `target` | Link target (e.g. `_blank`) |
+| `links` | List of links (see table below) |
+
+**Per link:**
+
+| Option | Description |
+|--------|-------------|
+| `title` | Link label |
+| `url` | Link URL |
+| `icon` | Empty = favicon; or `si:name`, `di:name`, `mdi:name`, `sh:name`, or full URL |
+| `description` | Optional description |
+| `same-tab` | Override group `same-tab` |
+| `hide-arrow` | Override group `hide-arrow` |
+| `target` | Override group `target` |
+
+---
 
 ### RSS
 
-`title`, `style: list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2`, `limit`, `collapse-after` (-1 = off), `preserve-order`, `single-line-titles`, optional `thumbnail-height`, `card-height`, `feeds`. Each feed: `url`, optional `title`, `limit`, `hide-categories`, `hide-description`, `item-link-prefix`, `headers`. See [Caching and refresh](#caching-and-refresh).
+| Option | Description |
+|--------|-------------|
+| `title` | Widget title (default: "RSS Feed") |
+| `style` | `list`, `vertical-list`, `detailed-list`, `horizontal-cards`, `horizontal-cards-2` (default: `list`) |
+| `limit` | Max items shown (default: `25`) |
+| `collapse-after` | Show "Show more" after N items; use `-1` to disable (default: `5`) |
+| `preserve-order` | Keep feed order instead of sorting by newest (default: `false`) |
+| `single-line-titles` | Force single-line item titles (default: `false`) |
+| `thumbnail-height` | Optional height for thumbnails |
+| `card-height` | Optional height for cards (card styles) |
+| `feeds` | List of feeds (see table below) |
 
-Full options and examples: **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)**.
+**Per feed:**
+
+| Option | Description |
+|--------|-------------|
+| `url` | Feed URL |
+| `title` | Optional override for feed name |
+| `limit` | Per-feed item limit; `0` = use widget `limit` |
+| `hide-categories` | Hide item categories |
+| `hide-description` | Hide item description |
+| `item-link-prefix` | Prefix for item links |
+| `headers` | Optional HTTP headers (e.g. for auth) |
+
+See [Caching and refresh](#caching-and-refresh) for RSS cache TTL.
+
+---
+
+**Full YAML examples:** [quick-start/config.example.full.yml](quick-start/config.example.full.yml)
 
 ---
 
