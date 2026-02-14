@@ -83,16 +83,15 @@ docker run -d --name dash-dash-dash --restart on-failure \
 
 ### Podman quadlet
 
-Container file: `quick-start/dash-dash-dash/dash-dash-dash.container`. Expects data at **`~/dash-dash-dash`** (`.env`, `config/`, optional `assets/`).
+Container file: expects data at **`~/dash-dash-dash`** and also requires config/config.yml and .env by default.
 
-Copy the container file to the quadlet directory (e.g. `~/.config/containers/containers/`). Reload the user daemon and start the unit:
+Copy the container file to the quadlet directory (e.g. `~/.config/containers/sytemd/dash-dash-dash.service`). Reload the user daemon and start the unit:
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user start container-dash-dash-dash.service
+systemctl --user start dash-dash-dash.service
 ```
 
-(Unit name may vary; list with `systemctl --user list-units 'container-*'`.)
 
 ---
 
