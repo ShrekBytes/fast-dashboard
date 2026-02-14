@@ -63,7 +63,7 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
    cd ~/dash-dash-dash && docker compose up -d
    ```
 
-3. **Open** [http://localhost:8080](http://localhost:8080). Host and port are set in `config.yml` under `server`.
+Host and port are set in `config.yml` under `server`.
 
 **Useful commands** (run from `~/dash-dash-dash`):
 
@@ -72,7 +72,7 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 
 ---
 
-### Docker / Podman by hand
+### Docker / Podman Manual
 
 **Create a project directory** and add config (and optionally `.env`):
 
@@ -95,7 +95,7 @@ docker run -d --name dash-dash-dash --restart on-failure \
 
 **Podman:** Replace `docker` with `podman` in the command above.
 
-**Open** [http://localhost:8080](http://localhost:8080). If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
+If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
 
 ---
 
@@ -122,7 +122,7 @@ docker run -d --name dash-dash-dash --restart on-failure \
    systemctl --user start dash-dash-dash.service
    ```
 
-**Open** [http://localhost:8080](http://localhost:8080). To start at login: `systemctl --user enable dash-dash-dash.service`.
+To start at login: `systemctl --user enable dash-dash-dash.service`.
 
 If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remove the `EnvironmentFile=` line from the quadlet file.
 
