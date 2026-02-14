@@ -19,9 +19,6 @@ Volume=%h/fast-dashboard/config:/app/config:Z
 Volume=%h/fast-dashboard/assets:/app/assets:Z
 Volume=/etc/localtime:/etc/localtime:ro
 
-# Optional Docker socket (only if you need container widget)
-# Volume=/var/run/docker.sock:/var/run/docker.sock:ro
-
 # Port mapping (will not work when on Network=host)
 # PublishPort=9999:8080
 

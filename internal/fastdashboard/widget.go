@@ -43,8 +43,6 @@ func newWidget(widgetType string) (widget, error) {
 		w = &bookmarksWidget{}
 	case "rss":
 		w = &rssWidget{}
-	case "docker-containers":
-		w = &dockerContainersWidget{}
 	default:
 		return nil, fmt.Errorf("unknown widget type: %s", widgetType)
 	}

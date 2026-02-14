@@ -19,9 +19,6 @@ services:
       - ./assets:/app/assets:Z
       - /etc/localtime:/etc/localtime:ro
 
-    # Optional Docker socket (only if you need container widget)
-    # - /var/run/docker.sock:/var/run/docker.sock:ro
-
     # Port mapping (will not work when on Network=host)
     # ports:
     #   - "9999:8080"
