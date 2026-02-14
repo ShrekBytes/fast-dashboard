@@ -12,7 +12,7 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 ## Table of contents
 
 - [Installation](#installation)
-  - [Recommended: Docker](#recommended-docker)
+  - [Recommended: Docker Compose](#recommended-docker-compose)
   - [Docker / Podman by hand](#docker--podman-by-hand)
   - [Podman quadlet](#podman-quadlet)
   - [Run with Go (no Docker)](#run-with-go-no-docker)
@@ -43,32 +43,53 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 
 ## Installation
 
-### Recommended: Docker
+---
 
-Fetches the quick-start folder (config + docker-compose) and starts the stack.
+### Recommended: Docker Compose
 
-```bash
-curl -sL https://github.com/ShrekBytes/dash-dash-dash/archive/refs/heads/main.tar.gz | tar xz && cd dash-dash-dash-main/quick-start/dash-dash-dash && docker compose up -d
-```
+You need a **config file** and the **compose file**; optionally a **`.env`** for secrets. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) (minimal) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml) (full).
 
-Open **http://localhost:8080**.
+1. **Create a project directory** and add config + compose file:
 
-- **Stop:** `docker compose down` (from that folder).
-- **Update:** `docker compose pull && docker compose up -d`
+   ```bash
+   mkdir -p ~/dash-dash-dash/config
+   ```
+
+   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
+   - Copy [quick-start/dash-dash-dash/docker-compose.yml](quick-start/dash-dash-dash/docker-compose.yml) to `~/dash-dash-dash/docker-compose.yml`.
+   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
+
+2. **Start the stack:**
+
+   ```bash
+   cd ~/dash-dash-dash && docker compose up -d
+   ```
+
+3. **Open** [http://localhost:8080](http://localhost:8080). Host and port are set in `config.yml` under `server`.
+
+**Useful commands** (run from `~/dash-dash-dash`):
+
+- **Stop:** `docker compose down`
+- **Update image:** `docker compose pull && docker compose up -d`
 
 ---
 
 ### Docker / Podman by hand
 
-Image: `ghcr.io/shrekbytes/dash-dash-dash:latest`. One folder with `config.yml` (and optional `.env`), mounted at `/app/config`.
+You need a **config file** in a folder; optionally a **`.env`** for secrets. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml).
 
-**Setup:** Create a folder (e.g. `~/dash-dash-dash`), add `config/config.yml` and optionally `.env`. Copy a starting config from [quick-start/dash-dash-dash/config/config.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/dash-dash-dash/config/config.yml) or the [full reference](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml).
+**Create a project directory** and add config (and optionally `.env`):
+
+   ```bash
+   mkdir -p ~/dash-dash-dash/config
+   ```
+
+   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
+   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
 
 **Docker:**
 
 ```bash
-mkdir -p ~/dash-dash-dash/config
-# Put config.yml in ~/dash-dash-dash/config, .env in ~/dash-dash-dash
 docker run -d --name dash-dash-dash --restart on-failure \
   --network host \
   -v ~/dash-dash-dash/config:/app/config:Z \
@@ -76,40 +97,64 @@ docker run -d --name dash-dash-dash --restart on-failure \
   ghcr.io/shrekbytes/dash-dash-dash:latest
 ```
 
-**Podman:** Use `podman` instead of `docker` in the command above.
+**Podman:** Replace `docker` with `podman` in the command above.
+
+**Open** [http://localhost:8080](http://localhost:8080). If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
 
 ---
 
 ### Podman quadlet
 
-Container file: expects data at **`~/dash-dash-dash`** and also requires config/config.yml and .env by default.
+You need a **config file** at `~/dash-dash-dash/config/config.yml`; optionally **`.env`** at `~/dash-dash-dash/.env`. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml). Quadlet file: [quick-start/dash-dash-dash/dash-dash-dash.container](quick-start/dash-dash-dash/dash-dash-dash.container).
 
-Copy the container file to the quadlet directory (e.g. `~/.config/containers/sytemd/dash-dash-dash.service`). Reload the user daemon and start the unit:
+1. **Create the project directory** and add config (and optionally `.env`):
 
-```bash
-systemctl --user daemon-reload
-systemctl --user start dash-dash-dash.service
-```
+   ```bash
+   mkdir -p ~/dash-dash-dash/config
+   ```
+   Copy the starter config to `~/dash-dash-dash/config/config.yml`. Create `~/dash-dash-dash/.env` only if you need environment variables.
 
+2. **Copy the quadlet file** to the systemd user drop-in directory:
+
+   ```bash
+   mkdir -p ~/.config/containers/systemd
+   cp path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container ~/.config/containers/systemd/dash-dash-dash.container
+   ```
+   Replace `path/to/dash-dash-dash` with your repo path (e.g. `~/dash-dash-dash` if you cloned there).
+
+3. **Reload and start:**
+
+   ```bash
+   systemctl --user daemon-reload
+   systemctl --user start dash-dash-dash.service
+   ```
+
+**Open** [http://localhost:8080](http://localhost:8080). To start at login: `systemctl --user enable dash-dash-dash.service`.
+
+If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remove the `EnvironmentFile=` line from the quadlet file.
 
 ---
 
 ### Run with Go (no Docker)
 
-Requires Go 1.21+. Place `config.yml` in the same directory as the binary, or pass `-config`.
+**Requires Go 1.21+.** You need a **config file** in the same directory as the binary, or pass `-config <path>`. Starter config: [quick-start/config.example.full.yml](quick-start/config.example.full.yml) or [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml).
 
-Copy [quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml) as a starting point, then:
+1. Copy a starter config to `config.yml` in your working directory.
 
-```bash
-go build -o dash-dash-dash .
-./dash-dash-dash
-```
+2. Build and run:
 
-With an explicit config path:
+   ```bash
+   go build -o dash-dash-dash .
+   ./dash-dash-dash
+   ```
 
-```bash
-./dash-dash-dash -config path/to/config.yml
-```
+   With an explicit config path:
+
+   ```bash
+   ./dash-dash-dash -config path/to/config.yml
+   ```
+
+**Open** [http://localhost:8080](http://localhost:8080) (or the host/port set in `config.yml` under `server`).
 
 ---
 
