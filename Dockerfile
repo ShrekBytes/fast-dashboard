@@ -13,4 +13,3 @@ COPY --from=builder /app/dash-dash-dash .
 
 EXPOSE 8080/tcp
 ENTRYPOINT ["/app/dash-dash-dash", "--config", "/app/config/config.yml"]
-
