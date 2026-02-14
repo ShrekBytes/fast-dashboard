@@ -1,0 +1,27 @@
+services:
+  fast-dashboard:
+    image: ghcr.io/shrekbytes/fast-dashboard:latest
+    container_name: fast-dashboard
+
+    # Restart behavior
+    restart: on-failure
+
+    # change ip and port from config.yml
+    network_mode: "host"
+
+    # Environment file
+    env_file:
+      - ./self-hosted/fast-dashboard/.env
+
+    # Persistent storage
+    volumes:
+      - ./self-hosted/fast-dashboard/config:/app/config:Z
+      - ./self-hosted/fast-dashboard/assets:/app/assets:Z
+      - /etc/localtime:/etc/localtime:ro
+
+    # Optional Docker socket (only if you need container widget)
+    # - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    # Port mapping (will not work when on Network=host)
+    # ports:
+    #   - "9999:8080"
