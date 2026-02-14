@@ -4,6 +4,8 @@ A minimal, fast dashboard for your browser new-tab or home page. Clock, weather,
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
+![Fast Dashboard Preview](quick-start/screenshots/preview.png) 
+
 ---
 
 ## Table of contents
