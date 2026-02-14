@@ -101,7 +101,8 @@ If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an 
    ```bash
    mkdir -p ~/dash-dash-dash/config
    ```
-   Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`. Create `~/dash-dash-dash/.env` only if you need environment variables.
+   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
+   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
 
 2. **Copy the quadlet file** to the systemd user drop-in directory:
 
