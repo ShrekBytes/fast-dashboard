@@ -4,7 +4,6 @@ Minimal, fast dashboard: clock, weather, search, bookmarks, to-do, service check
 
 Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more features, use Glance; for less and lightning-fast, this is it.
 
-![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png)
 
