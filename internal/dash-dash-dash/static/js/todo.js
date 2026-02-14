@@ -48,7 +48,7 @@ function saveToLocalStorage(id, data) {
 function Item(unserialize = {}, onUpdate, onDelete, onEscape, onDragStart) {
     let item, input, inputArea;
 
-    const serializeable = {
+    const serializable = {
         text: unserialize.text || "",
         checked: unserialize.checked || false
     };
@@ -59,10 +59,10 @@ function Item(unserialize = {}, onUpdate, onDelete, onEscape, onDragStart) {
             .styles({ marginTop: "-0.1rem" })
             .attrs({ type: "checkbox" })
             .on("change", (e) => {
-                serializeable.checked = e.target.checked;
+                serializable.checked = e.target.checked;
                 onUpdate();
             })
-            .tap(self => self.checked = serializeable.checked),
+            .tap(self => self.checked = serializable.checked),
 
         input = autoScalingTextarea(textarea => inputArea = textarea
             .classes("todo-item-text")
@@ -79,7 +79,7 @@ function Item(unserialize = {}, onUpdate, onDelete, onEscape, onDragStart) {
                 }
             })
             .on("input", () => {
-                serializeable.text = inputArea.value;
+                serializable.text = inputArea.value;
                 onUpdate();
             })
         ).classes("min-width-0", "grow").append(
@@ -94,10 +94,10 @@ function Item(unserialize = {}, onUpdate, onDelete, onEscape, onDragStart) {
             .on("click", () => onDelete(item))
     );
 
-    input.component.setValue(serializeable.text);
+    input.component.setValue(serializable.text);
     return item.component({
         focusInput: () => inputArea.focus(),
-        serialize: () => serializeable
+        serialize: () => serializable
     });
 }
 

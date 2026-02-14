@@ -9,9 +9,9 @@
 server:
   host: "0.0.0.0"              # bind address
   port: 8080
-  base-url: "http://localhost:8080"   # used for links and asset URLs
-  # assets-path: "/path/to/assets"     # optional; files served at /assets/ (icons, etc.)
-  # proxied: false                     # optional; set if behind a reverse proxy
+  base-url: http://localhost:8080   # used for links and asset URLs
+  # assets-path: /path/to/assets     # optional; files served at /assets/ (icons, etc.)
+  # proxied: false                   # optional; set if behind a reverse proxy
 
 document:
   # head: "<meta name=\"custom\" content=\"value\">"   # optional HTML injected into <head>
@@ -21,19 +21,19 @@ theme:
   primary-color: "43 50 70"
   contrast-multiplier: 1.1
   text-saturation-multiplier: 1.0
-  # positive-color: "120 50 50"        # optional; e.g. for success
-  # negative-color: "0 50 50"          # optional; e.g. for errors
-  # light: false                       # optional; light theme
-  # custom-css-file: "https://example.com/extra.css"   # optional; extra CSS URL
+  # positive-color: "120 50 50"      # optional; e.g. for success
+  # negative-color: "0 50 50"        # optional; e.g. for errors
+  # light: false                    # optional; light theme
+  # custom-css-file: https://example.com/extra.css   # optional; extra CSS URL
 
 branding:
-  app-name: "DASH-DASH-DASH"
+  app-name: DASH-DASH-DASH
   footer: "Powered by DASH-DASH-DASH" # plain text or HTML; empty or omit to hide
-  # logo-text: ""                     # optional
-  # logo-url: ""                      # optional
-  # favicon-url: ""                   # optional; /favicon.ico redirects here
-  # app-icon-url: ""                 # optional
-  # app-background-color: ""         # optional
+  # logo-text: ""                   # optional
+  # logo-url: ""                    # optional
+  # favicon-url: ""                 # optional; /favicon.ico redirects here
+  # app-icon-url: ""                # optional
+  # app-background-color: ""        # optional
 
 # Variables: in any string use $ { ENV_NAME } (no spaces), or secret:name, or readFileFromEnv:ENV_NAME. Escape as \ before $
 # Includes: - $include: path/to/file.yml   (relative to this file; recursion limit 20)
@@ -56,7 +56,7 @@ pages:
         widgets:
           # -------- Clock --------
           - type: clock
-            # title: "Clock"           # optional; default "Clock"
+            # title: Clock             # optional; default "Clock"
             hour-format: 24h           # 12h | 24h
             timezones:                 # optional extra timezones
               - timezone: America/New_York
@@ -73,7 +73,7 @@ pages:
 
           # -------- Weather --------
           - type: weather
-            location: "City, Country"  # or "City, Area, Country"
+            location: City, Country  # or "City, Area, Country"
             units: metric               # metric | imperial
             hour-format: 12h            # 12h | 24h
             hide-location: false
@@ -101,10 +101,10 @@ pages:
             bangs:
               - shortcut: "!yt"
                 title: YouTube
-                url: "https://www.youtube.com/results?search_query={QUERY}"
+                url: https://www.youtube.com/results?search_query={QUERY}
               - shortcut: "!w"
                 title: Wikipedia
-                url: "https://en.wikipedia.org/wiki/Special:Search?search={QUERY}"
+                url: https://en.wikipedia.org/wiki/Special:Search?search={QUERY}
 
           # -------- Service Monitor --------
           - type: monitor
@@ -113,8 +113,8 @@ pages:
             show-failing-only: false   # true = only show failing sites
             sites:
               - title: My App
-                url: "http://localhost:3000"
-                icon: "si:docker"       # si: | di: | mdi: | sh: or full URL
+                url: http://localhost:3000
+                icon: si:docker       # si: | di: | mdi: | sh: or full URL
                 same-tab: false
                 # check-url: "http://localhost:3000/health"   # URL used for health check (default: url)
                 # allow-insecure: true                       # skip TLS verify
@@ -130,13 +130,13 @@ pages:
             title: Bookmarks
             groups:
               - title: General
-                # color: "200 60 50"   # optional HSL; omit for default
+                # color: "200 60 50"  # optional HSL; omit for default
                 same-tab: false
                 # hide-arrow: false
                 # target: "_blank"
                 links:
                   - title: Gmail
-                    url: "https://mail.google.com"
+                    url: https://mail.google.com
                     icon: ""            # empty = favicon; or si:gmail, URL, etc.
                     # description: ""
                     # same-tab: false    # per-link override
@@ -154,7 +154,7 @@ pages:
             # thumbnail-height: 0       # optional
             # card-height: 0            # optional
             feeds:
-              - url: "https://example.com/feed.xml"
+              - url: https://example.com/feed.xml
                 title: ""               # optional override for feed name
                 limit: 0                # per-feed limit; 0 = use widget limit
                 hide-categories: false
@@ -170,7 +170,7 @@ pages:
             limit: 8
             collapse-after: -1
             feeds:
-              - url: "https://example.com/feed.xml"
+              - url: https://example.com/feed.xml
                 limit: 5
 
   # Second page (optional)
@@ -186,7 +186,7 @@ pages:
             limit: 50
             preserve-order: true
             feeds:
-              - url: "https://example.com/a.xml"
-              - url: "https://example.com/b.xml"
-                title: "Custom Title"
+              - url: https://example.com/a.xml
+              - url: https://example.com/b.xml
+                title: Custom Title
 

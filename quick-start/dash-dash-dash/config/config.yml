@@ -4,10 +4,10 @@
 server:
   host: "0.0.0.0"
   port: 8080
-  base-url: "http://localhost:8080"
+  base-url: http://localhost:8080
 
 branding:
-  app-name: "DASH-DASH-DASH"
+  app-name: DASH-DASH-DASH
   # Footer text or HTML (e.g. links); leave empty or omit to hide footer
   footer: "ShrekBytes"
 
@@ -25,7 +25,7 @@ pages:
           #   first-day-of-week: saturday
 
           - type: weather
-            location: "Dhaka, Bangladesh"
+            location: Dhaka, Bangladesh
             units: metric
             hour-format: 12h
 
@@ -47,29 +47,29 @@ pages:
             title: Services
             sites:
               - title: Vaultwarden
-                url: "http://localhost:80"
-                icon: "si:vaultwarden"
+                url: http://localhost:80
+                icon: si:vaultwarden
               - title: Google
-                url: "https://google.com"
-                icon: "si:google"
+                url: https://google.com
+                icon: si:google
               - title: Gitea
-                url: "http://localhost:3000"
-                icon: "si:gitea"
+                url: http://localhost:3000
+                icon: si:gitea
               - title: Jellyfin
-                url: "http://localhost:8096"
-                icon: "si:jellyfin"
+                url: http://localhost:8096
+                icon: si:jellyfin
               - title: Home Assistant
-                url: "http://localhost:8123"
-                icon: "si:homeassistant"
+                url: http://localhost:8123
+                icon: si:homeassistant
               - title: Grafana
-                url: "http://localhost:3001"
-                icon: "si:grafana"
+                url: http://localhost:3001
+                icon: si:grafana
               - title: Prometheus
-                url: "http://localhost:9090"
-                icon: "si:prometheus"
+                url: http://localhost:9090
+                icon: si:prometheus
               - title: Portainer
-                url: "http://localhost:9000"
-                icon: "si:docker"
+                url: http://localhost:9000
+                icon: si:docker
 
 
           - type: bookmarks

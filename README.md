@@ -313,7 +313,7 @@ Icon: empty = favicon; or `si:`, `di:`, `mdi:`, `sh:` + name, or URL.
 | RSS | 2 h |
 | IP | 10 min |
 
-Background job refreshes due widgets every 5 minutes. Static assets: 24 h; HTML/API: no-cache.
+Static assets: 24 h; HTML/API: no-cache.
 
 **Health:** `GET /api/healthz` returns 200 when the app is up.
 
