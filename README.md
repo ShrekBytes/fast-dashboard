@@ -59,8 +59,6 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
    cd ~/dash-dash-dash && docker compose up -d
    ```
 
-Host and port are set in `config.yml` under `server`.
-
 **Useful commands** (run from `~/dash-dash-dash`):
 
 - **Stop:** `docker compose down`
@@ -102,14 +100,14 @@ If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an 
    ```bash
    mkdir -p ~/dash-dash-dash/config
    ```
-   Copy the starter config to `~/dash-dash-dash/config/config.yml`. Create `~/dash-dash-dash/.env` only if you need environment variables.
+   Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`. Create `~/dash-dash-dash/.env` only if you need environment variables.
 
 2. **Copy the quadlet file** to the systemd user drop-in directory:
 
    ```bash
    mkdir -p ~/.config/containers/systemd
    ```
-   paste the contents of path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container in ~/.config/containers/systemd/dash-dash-dash.container
+   Copy [path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container](path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container) to `~/.config/containers/systemd/dash-dash-dash.container`
    
 3. **Reload and start:**
 
@@ -117,8 +115,6 @@ If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an 
    systemctl --user daemon-reload
    systemctl --user start dash-dash-dash.service
    ```
-
-To start at login: `systemctl --user enable dash-dash-dash.service`.
 
 If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remove the `EnvironmentFile=` line from the quadlet file.
 
@@ -137,7 +133,7 @@ If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remov
    ./dash-dash-dash
    ```
 
-   With an explicit config path:
+   Or with an explicit config path:
 
    ```bash
    ./dash-dash-dash -config path/to/config.yml
