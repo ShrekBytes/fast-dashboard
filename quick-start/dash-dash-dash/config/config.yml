@@ -46,12 +46,12 @@ pages:
           - type: monitor
             title: Services
             sites:
-              - title: CopyParty
-                url: "http://localhost:3923"
-                icon: "si:nextcloud"
-              - title: OwnCloud
-                url: "https://vw.00022000.xyz"
-                icon: "si:nextcloud"
+              - title: Vaultwarden
+                url: "http://localhost:80"
+                icon: "si:vaultwarden"
+              - title: Google
+                url: "https://google.com"
+                icon: "si:google"
               - title: Gitea
                 url: "http://localhost:3000"
                 icon: "si:gitea"
