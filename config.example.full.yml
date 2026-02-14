@@ -162,21 +162,6 @@ pages:
                 # item-link-prefix: ""  # optional prefix for item links
                 # headers: {}           # optional HTTP headers, e.g. Authorization
 
-          # -------- Docker Containers --------
-          - type: docker-containers
-            title: Docker Containers
-            sock-path: /var/run/docker.sock   # or tcp://host:2375
-            running-only: false
-            hide-by-default: false
-            category: ""                     # optional label filter (fast-dashboard.category)
-            format-container-names: true
-            # containers:                    # optional per-container label overrides
-            #   container-name:
-            #     name: "Display Name"
-            #     url: "https://..."
-            #     icon: "si:docker"
-            #     category: "tools"
-
       - size: small
         widgets:
           - type: rss
@@ -205,8 +190,3 @@ pages:
               - url: "https://example.com/b.xml"
                 title: "Custom Title"
 
-# -----------------------------------------------------------------------------
-# Docker/Podman labels for docker-containers widget (on the container, not in YAML):
-#   fast-dashboard.name, fast-dashboard.url, fast-dashboard.icon,
-#   fast-dashboard.category, fast-dashboard.parent
-# -----------------------------------------------------------------------------

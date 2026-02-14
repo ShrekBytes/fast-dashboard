@@ -43,11 +43,6 @@ pages:
             placeholder: "Search or enter URL…"
             autofocus: true
 
-          # - type: docker-containers
-            # sock-path: /var/run/docker.sock
-            # format-container-names: true
-            # running-only: false
-
           - type: monitor
             title: Services
             sites:

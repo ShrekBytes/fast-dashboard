@@ -1,178 +1,263 @@
 # Fast Dashboard
 
-A minimal, fast-loading dashboard for browser new-tab or home page. Single binary, no runtime dependencies. Based on [Glance](https://github.com/glanceapp/glance).
+A minimal, fast dashboard for your browser new-tab or home page. Clock, weather, search, bookmarks, to-do, service checks, RSS—whatever you want. Single binary or one container, no fuss.
 
-![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
-**Requirements:** Go 1.21+ or Docker/Podman. Config: copy `config.example.yml` to `config.yml` (or mount at `/app/config/config.yml` in containers).
+---
+
+## Table of contents
+
+- [Installation](#installation)
+  - [Recommended: curl + Docker](#recommended-curl--docker)
+  - [Docker / Podman by hand](#docker--podman-by-hand)
+  - [Podman quadlet](#podman-quadlet)
+  - [Run with Go (no Docker)](#run-with-go-no-docker)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+  - [Config file location](#config-file-location)
+  - [Includes](#includes)
+  - [Hot reload](#hot-reload)
+- [Config reference](#config-reference)
+  - [Top-level sections](#top-level-sections)
+  - [Pages and columns](#pages-and-columns)
+- [Widgets](#widgets)
+  - [Clock](#clock)
+  - [Calendar](#calendar)
+  - [Weather](#weather)
+  - [IP address](#ip-address)
+  - [To-do](#to-do)
+  - [Search](#search)
+  - [Service monitor](#service-monitor)
+  - [Bookmarks](#bookmarks)
+  - [RSS](#rss)
+- [Caching and refresh](#caching-and-refresh)
+- [CLI](#cli)
+- [Troubleshooting](#troubleshooting)
+- [Credits and license](#credits-and-license)
+
+---
+
+## Installation
+
+### Recommended: curl + Docker
+
+Download the ready-to-use folder (config + `.env` + `docker-compose.yml`), then start with Docker. One copy-paste.
+
+```bash
+curl -sL https://github.com/ShrekBytes/fast-dashboard/archive/refs/heads/main.tar.gz | tar xz && cd fast-dashboard-main/quick-start/fast-dashboard && docker compose up -d
+```
+
+You get a folder with `config/`, `.env`, and `docker-compose.yml`. The app runs in the background.
+
+- **First time:** Open **http://localhost:8080**. Set it as your new-tab or homepage if you like.
+- **Stop:** In that folder, run `docker compose down`.
+- **Update:** `docker compose pull && docker compose up -d`
+
+---
+
+### Docker / Podman by hand
+
+Use the image `ghcr.io/shrekbytes/fast-dashboard:latest`. You need a folder with `config.yml` (and optionally `.env`). Mount that folder at `/app/config` and pass the env file if used.
+
+Example (Docker):
+
+```bash
+mkdir -p ~/fast-dashboard/config
+# put config.yml in ~/fast-dashboard/config, .env in ~/fast-dashboard
+docker run -d --name fast-dashboard --restart on-failure \
+  --network host \
+  -v ~/fast-dashboard/config:/app/config:Z \
+  -v ~/fast-dashboard/.env:/app/.env:ro \
+  ghcr.io/shrekbytes/fast-dashboard:latest
+```
+
+The app reads `config.yml` from `/app/config/config.yml` inside the container.
+
+---
+
+### Podman quadlet
+
+The repo includes `quick-start/fast-dashboard/fast-dashboard.container` for Podman quadlet. It expects the dashboard data at **`~/fast-dashboard`**: that folder should contain `.env`, `config/`, and optionally `assets/`.
+
+1. Copy or symlink the `quick-start/fast-dashboard` folder to `~/fast-dashboard`.
+2. Copy the container file to your quadlet directory, e.g. `~/.config/containers/containers/fast-dashboard.container`.
+3. Run `podman generate systemd --new --name fast-dashboard` or let your system manage the unit; the container file uses `AutoUpdate=registry`.
+
+---
+
+### Run with Go (no Docker)
+
+You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy from [config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml) and edit), then:
+
+```bash
+go build -o fast-dashboard .
+./fast-dashboard
+```
+
+Or specify a config file:
+
+```bash
+go build -o fast-dashboard . && ./fast-dashboard -config config.example.yml
+```
 
 ---
 
 ## Quick start
 
-**Docker (recommended)**
-
-```bash
-mkdir -p config && cp config.example.yml config/config.yml
-# Edit config/config.yml
-docker compose build && docker compose up -d
-```
-
-Open **http://localhost:8080**. Set your browser’s new-tab or homepage to this URL.
-
-**From source**
-
-```bash
-cp config.example.yml config.yml   # edit as needed
-go build -o fast-dashboard .
-./fast-dashboard
-```
-
----
-
-## Features
-
-- **Clock** — Local time, 12h/24h, optional timezones
-- **Calendar** — Month view, configurable first day of week
-- **Weather** — Current + hourly (Open-Meteo, no API key)
-- **IP** — Hostname, active local IP (default-route), optional public IP + country
-- **Service Monitor** — Health checks with response time and uptime dots (last 10)
-- **Search** — URL or search; bangs and custom shortcuts
-- **Bookmarks** — Grouped links, favicons or CDN icons (`si:`, `di:`, `mdi:`, `sh:`)
-- **RSS** — List, detailed-list, horizontal-cards; per-feed options
-- **To-Do** — Client-side (localStorage)
-- **Docker Containers** — From Docker/Podman socket, with labels and categories
-
-Single binary, config hot-reload (fsnotify), background refresh every 5 min, health endpoint: `GET /api/healthz`.
+After installation, open **http://localhost:8080** (or the host/port you set in `server.port` and `server.base-url`). Set your browser’s new-tab or homepage to this URL to use the dashboard as your start page.
 
 ---
 
 ## Configuration
 
-YAML config path: `-config` flag (default `config.yml`). **config.example.yml** = minimal; **config.example.full.yml** = every option documented.
+All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/fast-dashboard/config/config.yml`.
+
+### Config file location
+
+- **Docker/Podman:** The app expects `config.yml` at `/app/config/config.yml` (mount your folder at `/app/config`).
+- **Go binary:** By default the binary looks for `config.yml` in the current working directory. Override with `-config /path/to/config.yml`.
+
+### Includes
+
+You can split config into multiple files and include them:
+
+```yaml
+# In your main config.yml:
+pages:
+  - $include: partials/home-page.yml
+```
+
+Paths are relative to the file that contains the `$include`. Recursion limit is 20.
+
+### Hot reload
+
+When you change the config file on disk, the app reloads it automatically (fsnotify). Refresh the browser to see changes; no need to restart the container or binary for most edits. Changes to `.env` require a restart.
+
+---
+
+## Config reference
+
+### Top-level sections
 
 | Section | Purpose |
 |--------|--------|
-| `server` | `host`, `port`, `base-url`, optional `assets-path` for `/assets/` |
-| `branding` | `app-name`, `footer` (plain text or HTML; empty = hide) |
-| `theme` | HSL colors: `background-color`, `primary-color`, `contrast-multiplier`, optional `positive-color`, `negative-color`, `custom-css-file` |
-| `pages` | List of pages: `name`, `slug` (empty = `/`), `columns` with `size: small|full` and `widgets` |
+| `server` | `host`, `port`, `base-url` (used for links and assets). Optional: `assets-path`. |
+| `document` | Optional `head`: HTML injected into `<head>`. |
+| `theme` | `background-color`, `primary-color` (HSL: `"hue sat light"`), `contrast-multiplier`, `text-saturation-multiplier`. Optional: `positive-color`, `negative-color`, `light`, `custom-css-file`. |
+| `branding` | `app-name`, `footer` (plain text or HTML; empty = hide). Optional: `logo-text`, `logo-url`, `favicon-url`, `app-icon-url`, `app-background-color`. |
+| `pages` | List of pages; each has `name`, `slug` (empty = `/`), `columns` with `size: small \| full` and `widgets`. |
 
-**Includes:** `- $include: path/to/file.yml` (paths relative to containing file).  
-**Variables:** `${VAR}`, `${secret:name}`, `${readFileFromEnv:VAR}`. Escape literal `$` with `\`.
+### Pages and columns
 
----
-
-## Widget reference (summary)
-
-| Widget | Key options |
-|--------|-------------|
-| `clock` | `hour-format: 12h|24h`, `timezones` |
-| `calendar` | `first-day-of-week` |
-| `weather` | `location`, `units`, `hour-format` |
-| `ip-address` | `public-url` (omit = ipinfo.io; `""` = hide), `interfaces` (optional filter) |
-| `monitor` | `sites` (url, icon, check-url, timeout, basic-auth, etc.) |
-| `search` | `search-engine`, `placeholder`, `bangs` |
-| `bookmarks` | `groups` (title, links with url, icon) |
-| `rss` | `style`, `feeds`, `limit`, `preserve-order` |
-| `to-do` | `id` (localStorage key) |
-| `docker-containers` | `sock-path`, `running-only`, `category` (label filter) |
-
-Docker/Podman socket: add your user to the `docker` group (or use Podman socket) so the widget can list containers. See **config.example.yml** for all options.
+- **Page:** `name` (shown in nav), `slug` (URL path; empty = root `/`), `hide-desktop-navigation`, `center-vertically`, `width` (default \| wide \| slim), optional `head-widgets`.
+- **Column:** `size: small` or `full`. Each column has a `widgets` list.
 
 ---
 
-## Deploy
+## Widgets
 
-**Docker Compose**
+Widgets are listed under `pages[].columns[].widgets`. Each widget has `type` and type-specific options. Common options (when supported): `title`, `hide-header`, `css-class`, `cache` (override TTL, e.g. `1m`, `5m`, `1h`).
 
-```bash
-docker compose build && docker compose up -d
-```
+### Clock
 
-Compose mounts `./config` and the Docker socket.
+- **Options:** `hour-format: 12h | 24h`, `timezones` (list of `timezone` + `label`).
+- Shows local time and optional extra timezones.
 
-**Podman (Quadlet)**
+### Calendar
 
-Copy the Quadlet file to `~/.config/containers/systemd/`. The image is set to `ghcr.io/shrekbytes/fast-dashboard:latest` (required for `AutoUpdate=registry`). Ensure config exists at the paths in the file (default: `%h/self-hosted/fast-dashboard/config` and `assets`). Uses `Network=host` — set `server.host` and `server.port` in `config.yml` to match. Optional: `EnvironmentFile` for env vars; uncomment the Docker socket volume for the container widget.
+- **Options:** `first-day-of-week` (e.g. `monday`, `sunday`).
+- Month view.
 
-```bash
-mkdir -p ~/self-hosted/fast-dashboard/config ~/self-hosted/fast-dashboard/assets
-cp config.example.yml ~/self-hosted/fast-dashboard/config/config.yml
+### Weather
 
-cp fast-dashboard.container ~/.config/containers/systemd/
-# Image=ghcr.io/shrekbytes/fast-dashboard:latest (already set in the file)
+- **Options:** `location` (e.g. `"City, Country"`), `units: metric | imperial`, `hour-format: 12h | 24h`, `hide-location`, `show-area-name`.
+- Uses Open-Meteo; no API key. Current conditions and hourly forecast.
 
-systemctl --user daemon-reload
-systemctl --user enable --now fast-dashboard
-```
+### IP address
 
-**Plain Docker**
+- **Options:** `public-url`: omit = use default (ipinfo.io, IP + country); set to `""` to hide public IP. Optional `interfaces` (e.g. `[wlo1, eth0]`) to limit which interfaces are shown.
+- Shows hostname, local IP (default route), and optionally public IP and country.
 
-```bash
-docker build -t fast-dashboard .
-docker run -d -p 8080:8080 \
-  -v "$(pwd)/config:/app/config:ro" \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  fast-dashboard
-```
+### To-do
 
-Image expects `config.yml` at `/app/config/config.yml`. Optional: `-v /path/to/assets:/app/assets:ro`.
+- **Options:** `id` (localStorage key; use different ids for separate lists).
+- Client-side only; data stays in your browser.
+
+### Search
+
+- **Options:** `search-engine` (e.g. `duckduckgo`, `google`, `bing`, or a URL with `{QUERY}`), `placeholder`, `autofocus`, `new-tab`, `target`, `bangs` (list of `shortcut`, `title`, `url` with `{QUERY}`).
+- Single bar: type a URL or search; bangs (e.g. `!yt`) open custom URLs.
+
+### Service monitor
+
+- **Options:** `title`, `style: "" | compact`, `show-failing-only`, `sites` (list). Each site: `title`, `url`, `icon` (e.g. `si:docker`, or full URL), `same-tab`, optional `check-url`, `allow-insecure`, `timeout`, `error-url`, `alt-status-codes`, `basic-auth` (username/password; password can use `secret:name`).
+- Health checks with response time and uptime dots (last 10). Default check URL = `url`; default timeout 3s.
+
+### Bookmarks
+
+- **Options:** `title`, `groups`. Each group: `title`, optional `color` (HSL), `same-tab`, `links`. Each link: `title`, `url`, optional `icon` (empty = favicon; or `si:name`, URL), `description`, `same-tab`, `target`.
+- Icons: use `si:`, `di:`, `mdi:`, `sh:` for Simple Icons, Devicons, Material Design Icons, or a full URL.
+
+### RSS
+
+- **Options:** `title`, `style: list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2`, `limit`, `collapse-after` (-1 to disable), `preserve-order`, `single-line-titles`, optional `thumbnail-height`, `card-height`, `feeds`. Each feed: `url`, optional `title`, `limit` (0 = use widget limit), `hide-categories`, `hide-description`, `item-link-prefix`, `headers`.
+- Fetched and cached; see [Caching and refresh](#caching-and-refresh).
+
+For every option and example, see **[config.example.full.yml](https://github.com/ShrekBytes/fast-dashboard/blob/main/config.example.full.yml)**.
 
 ---
 
-## Commands
+## Caching and refresh
 
-| Command | Description |
-|---------|-------------|
-| `fast-dashboard` | Run server (default config: `config.yml`) |
-| `fast-dashboard -config /path/to/config.yml` | Custom config |
-| `fast-dashboard config:validate` | Validate config, exit 0 if OK |
-| `fast-dashboard config:print` | Print parsed config (includes + variables resolved) |
-| `fast-dashboard --version` | Version |
-| `fast-dashboard diagnose` | Diagnostics |
-
-Health: **GET /api/healthz** → 200 when up.
-
----
-
-## Caching
-
-| Widget | TTL |
-|--------|-----|
+| Widget | Cache TTL |
+|--------|-----------|
 | Weather | On the hour |
 | Monitor | 5 min |
 | RSS | 2 h |
 | IP | 10 min |
-| Docker | 1 min |
 
-Background job refreshes due widgets every 5 minutes. Static assets: 24 h cache; HTML/API: no-cache.
+A background job refreshes widgets that are due every 5 minutes. Static assets are cached 24 h; HTML/API responses are no-cache.
 
----
-
-## Project structure
-
-```
-fast-dashboard-go/
-├── main.go
-├── go.mod, go.sum
-├── config.example.yml
-├── Dockerfile, docker-compose.yml, fast-dashboard.container
-└── internal/fastdashboard/
-    ├── main.go, app.go, config.go, cli.go
-    ├── widget.go, widget-*.go, theme.go, templates.go
-    ├── embed.go (static + templates)
-    ├── static/, templates/
-```
-
-**How it works:** Server serves the page shell on `/` or `/{slug}`; the browser fetches `/api/pages/{page}/content/`, server refreshes due widgets and returns HTML; a background job refreshes widgets every 5 minutes.
+**Health endpoint:** `GET /api/healthz` returns 200 when the app is up. Useful for reverse proxies or monitoring.
 
 ---
 
-## Credits
+## CLI
 
-- [Glance](https://github.com/glanceapp/glance) by svenstaro (AGPL-3.0)
-- [Open-Meteo](https://open-meteo.com/), [DuckDuckGo Icons](https://icons.duckduckgo.com/), [JetBrains Mono](https://www.jetbrains.com/lp/mono/)
+When running the binary (Go):
+
+| Command / flag | Description |
+|----------------|-------------|
+| `-config <path>` | Config file path (default: `config.yml`). |
+| `--version`, `-v`, `version` | Print version and exit. |
+| `config:validate` | Validate the config file and exit. |
+| `config:print` | Print the parsed config with includes resolved. |
+| `diagnose` | Run diagnostic checks. |
+
+Example:
+
+```bash
+./fast-dashboard -config /etc/fast-dashboard/config.yml
+./fast-dashboard config:validate
+./fast-dashboard config:print
+```
+
+---
+
+## Troubleshooting
+
+| Issue | What to try |
+|-------|-------------|
+| Port already in use | Change `server.port` in config (e.g. to 8081) and restart. With Docker host networking, nothing else should use that port on the host. |
+| Config changes not visible | Ensure you’re editing the file mounted at `/app/config/config.yml` (containers) or the file passed with `-config` (binary). Save the file and refresh the browser; hot reload should pick it up. |
+| .env not applied | Restart the container after changing `.env`; env is read at start. |
+| Config error on start | Run `./fast-dashboard config:validate` (or the binary with `config:validate`) to see validation errors. Use `config:print` to see the merged config. |
+
+---
+
+## Credits and license
+
+Based on [Glance](https://github.com/glanceapp/glance) by svenstaro. Weather via [Open-Meteo](https://open-meteo.com/). Icons: [DuckDuckGo](https://icons.duckduckgo.com/), [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 
 **License:** AGPL-3.0. See [LICENSE](LICENSE).

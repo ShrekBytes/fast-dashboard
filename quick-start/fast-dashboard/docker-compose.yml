@@ -9,14 +9,14 @@ services:
     # change ip and port from config.yml
     network_mode: "host"
 
-    # Environment file
+    # Environment file (create .env in this folder if you need secrets in config)
     env_file:
-      - ./self-hosted/fast-dashboard/.env
+      - ./.env
 
-    # Persistent storage
+    # Persistent storage (config and optional assets live in this folder)
     volumes:
-      - ./self-hosted/fast-dashboard/config:/app/config:Z
-      - ./self-hosted/fast-dashboard/assets:/app/assets:Z
+      - ./config:/app/config:Z
+      - ./assets:/app/assets:Z
       - /etc/localtime:/etc/localtime:ro
 
     # Optional Docker socket (only if you need container widget)
