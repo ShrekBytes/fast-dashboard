@@ -47,8 +47,6 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 
 ### Recommended: Docker Compose
 
-You need a **config file** and the **compose file**; optionally a **`.env`** for secrets. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) (minimal) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml) (full).
-
 1. **Create a project directory** and add config + compose file:
 
    ```bash
@@ -75,8 +73,6 @@ You need a **config file** and the **compose file**; optionally a **`.env`** for
 ---
 
 ### Docker / Podman by hand
-
-You need a **config file** in a folder; optionally a **`.env`** for secrets. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml).
 
 **Create a project directory** and add config (and optionally `.env`):
 
@@ -105,8 +101,6 @@ docker run -d --name dash-dash-dash --restart on-failure \
 
 ### Podman quadlet
 
-You need a **config file** at `~/dash-dash-dash/config/config.yml`; optionally **`.env`** at `~/dash-dash-dash/.env`. Starter config: [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) or [quick-start/config.example.full.yml](quick-start/config.example.full.yml). Quadlet file: [quick-start/dash-dash-dash/dash-dash-dash.container](quick-start/dash-dash-dash/dash-dash-dash.container).
-
 1. **Create the project directory** and add config (and optionally `.env`):
 
    ```bash
@@ -118,10 +112,9 @@ You need a **config file** at `~/dash-dash-dash/config/config.yml`; optionally *
 
    ```bash
    mkdir -p ~/.config/containers/systemd
-   cp path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container ~/.config/containers/systemd/dash-dash-dash.container
    ```
-   Replace `path/to/dash-dash-dash` with your repo path (e.g. `~/dash-dash-dash` if you cloned there).
-
+   paste the contents of path/to/dash-dash-dash/quick-start/dash-dash-dash/dash-dash-dash.container in ~/.config/containers/systemd/dash-dash-dash.container
+   
 3. **Reload and start:**
 
    ```bash
@@ -137,7 +130,7 @@ If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remov
 
 ### Run with Go (no Docker)
 
-**Requires Go 1.21+.** You need a **config file** in the same directory as the binary, or pass `-config <path>`. Starter config: [quick-start/config.example.full.yml](quick-start/config.example.full.yml) or [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml).
+**Requires Go 1.21+.**
 
 1. Copy a starter config to `config.yml` in your working directory.
 
