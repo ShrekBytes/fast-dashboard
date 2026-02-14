@@ -1,0 +1,75 @@
+.monitor-site-icon {
+    display: block;
+    opacity: 0.8;
+    filter: grayscale(0.4);
+    object-fit: contain;
+    aspect-ratio: 1 / 1;
+    width: 3.2rem;
+    position: relative;
+    top: -0.1rem;
+    transition: filter 0.3s, opacity 0.3s;
+}
+
+.monitor-site-icon.flat-icon {
+    opacity: 0.7;
+}
+
+.monitor-site:hover .monitor-site-icon {
+    opacity: 1;
+}
+
+.monitor-site:hover .monitor-site-icon:not(.flat-icon) {
+    filter: grayscale(0);
+}
+
+/* Link hover: glow + slide right (same as FastAPI) */
+.monitor-site > .grow a {
+    transition: text-shadow 0.2s, transform 0.15s;
+    display: inline-block;
+}
+
+.monitor-site > .grow a:hover {
+    text-shadow: 0 0 8px var(--hover-glow);
+    transform: translateX(2px);
+}
+
+.monitor-site-status-icon {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 2rem;
+    height: 2rem;
+}
+
+.monitor-site-status-icon-compact {
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+}
+
+.monitor-uptime-dots {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.monitor-uptime-dots-compact {
+    margin-left: 0;
+}
+
+.monitor-uptime-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: block;
+    opacity: 0.8;
+}
+
+.monitor-uptime-dot-ok {
+    background-color: var(--color-positive);
+}
+
+.monitor-uptime-dot-fail {
+    background-color: var(--color-negative);
+}

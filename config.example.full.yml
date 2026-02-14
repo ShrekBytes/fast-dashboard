@@ -1,0 +1,212 @@
+# Fast Dashboard – full configuration reference
+# Every section, widget, and parameter documented. Use as config template or docs.
+# Copy to config.yml and remove/comment what you don't need.
+
+# -----------------------------------------------------------------------------
+# Top-level: server, document, theme, branding, pages
+# -----------------------------------------------------------------------------
+
+server:
+  host: "0.0.0.0"              # bind address
+  port: 8080
+  base-url: "http://localhost:8080"   # used for links and asset URLs
+  # assets-path: "/path/to/assets"     # optional; files served at /assets/ (icons, etc.)
+  # proxied: false                     # optional; set if behind a reverse proxy
+
+document:
+  # head: "<meta name=\"custom\" content=\"value\">"   # optional HTML injected into <head>
+
+theme:
+  background-color: "240 15 9"        # HSL: hue saturation lightness (space-separated, 0–360, 0–100, 0–100)
+  primary-color: "43 50 70"
+  contrast-multiplier: 1.1
+  text-saturation-multiplier: 1.0
+  # positive-color: "120 50 50"        # optional; e.g. for success
+  # negative-color: "0 50 50"          # optional; e.g. for errors
+  # light: false                       # optional; light theme
+  # custom-css-file: "https://example.com/extra.css"   # optional; extra CSS URL
+
+branding:
+  app-name: "Fast Dashboard"
+  footer: "Powered by Fast Dashboard" # plain text or HTML; empty or omit to hide
+  # logo-text: ""                     # optional
+  # logo-url: ""                      # optional
+  # favicon-url: ""                   # optional; /favicon.ico redirects here
+  # app-icon-url: ""                 # optional
+  # app-background-color: ""         # optional
+
+# Variables: in any string use $ { ENV_NAME } (no spaces), or secret:name, or readFileFromEnv:ENV_NAME. Escape as \ before $
+# Includes: - $include: path/to/file.yml   (relative to this file; recursion limit 20)
+
+# -----------------------------------------------------------------------------
+# Pages: name, slug, layout, columns, widgets
+# -----------------------------------------------------------------------------
+
+pages:
+  - name: Home
+    slug: ""                          # empty = root URL /
+    hide-desktop-navigation: true      # hide top nav (e.g. single page)
+    center-vertically: true
+    width: default                     # default | wide | slim
+    # desktop-navigation-width: wide   # wide | slim (nav bar)
+    # show-mobile-header: true
+    # head-widgets: []                 # optional widgets in page head
+    columns:
+      - size: small                    # small | full
+        widgets:
+          # -------- Clock --------
+          - type: clock
+            # title: "Clock"           # optional; default "Clock"
+            hour-format: 24h           # 12h | 24h
+            timezones:                 # optional extra timezones
+              - timezone: America/New_York
+                label: New York
+              - timezone: Europe/London
+                label: London
+            # hide-header: false
+            # css-class: ""
+            # cache: 0                  # optional override (duration: 1m, 5m, 1h, etc.)
+
+          # -------- Calendar --------
+          - type: calendar
+            first-day-of-week: monday  # monday | tuesday | ... | sunday
+
+          # -------- Weather --------
+          - type: weather
+            location: "City, Country"  # or "City, Area, Country"
+            units: metric               # metric | imperial
+            hour-format: 12h            # 12h | 24h
+            hide-location: false
+            show-area-name: false
+
+          # -------- IP Address --------
+          - type: ip-address
+            # omit public-url = default (ipinfo.io, IP + country). Set to "" to hide public IP.
+            # public-url: "https://api.ipify.org"   # plain-text IP only (country from 2nd request)
+            # interfaces: [wlo1, eth0]             # optional: only show these interface labels
+
+          # -------- To-Do --------
+          - type: to-do
+            id: main                   # localStorage key; use different ids for separate lists
+
+      - size: full
+        widgets:
+          # -------- Search / URL bar --------
+          - type: search
+            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity | kagi | startpage | or URL with {QUERY}
+            placeholder: "Search or enter URL…"
+            autofocus: true
+            new-tab: false
+            target: "_blank"
+            bangs:
+              - shortcut: "!yt"
+                title: YouTube
+                url: "https://www.youtube.com/results?search_query={QUERY}"
+              - shortcut: "!w"
+                title: Wikipedia
+                url: "https://en.wikipedia.org/wiki/Special:Search?search={QUERY}"
+
+          # -------- Service Monitor --------
+          - type: monitor
+            title: Services
+            style: ""                  # "" | compact
+            show-failing-only: false   # true = only show failing sites
+            sites:
+              - title: My App
+                url: "http://localhost:3000"
+                icon: "si:docker"       # si: | di: | mdi: | sh: or full URL
+                same-tab: false
+                # check-url: "http://localhost:3000/health"   # URL used for health check (default: url)
+                # allow-insecure: true                       # skip TLS verify
+                # timeout: 5s                                # 3s default; format: 1s, 2m, 1h
+                # error-url: "http://localhost:3000/status"   # link when down
+                # alt-status-codes: [301, 302]               # treat as success
+                # basic-auth:
+                #   username: admin
+                #   password: from Docker secret (e.g. secret:monitor_password)
+
+          # -------- Bookmarks --------
+          - type: bookmarks
+            title: Bookmarks
+            groups:
+              - title: General
+                # color: "200 60 50"   # optional HSL; omit for default
+                same-tab: false
+                # hide-arrow: false
+                # target: "_blank"
+                links:
+                  - title: Gmail
+                    url: "https://mail.google.com"
+                    icon: ""            # empty = favicon; or si:gmail, URL, etc.
+                    # description: ""
+                    # same-tab: false    # per-link override
+                    # hide-arrow: false
+                    # target: "_blank"
+
+          # -------- RSS --------
+          - type: rss
+            title: News
+            style: list                 # list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2
+            limit: 25
+            collapse-after: 5           # -1 to disable collapse
+            preserve-order: false       # true = keep feed order instead of newest first
+            single-line-titles: false
+            # thumbnail-height: 0       # optional
+            # card-height: 0            # optional
+            feeds:
+              - url: "https://example.com/feed.xml"
+                title: ""               # optional override for feed name
+                limit: 0                # per-feed limit; 0 = use widget limit
+                hide-categories: false
+                hide-description: false
+                # item-link-prefix: ""  # optional prefix for item links
+                # headers: {}           # optional HTTP headers, e.g. Authorization
+
+          # -------- Docker Containers --------
+          - type: docker-containers
+            title: Docker Containers
+            sock-path: /var/run/docker.sock   # or tcp://host:2375
+            running-only: false
+            hide-by-default: false
+            category: ""                     # optional label filter (fast-dashboard.category)
+            format-container-names: true
+            # containers:                    # optional per-container label overrides
+            #   container-name:
+            #     name: "Display Name"
+            #     url: "https://..."
+            #     icon: "si:docker"
+            #     category: "tools"
+
+      - size: small
+        widgets:
+          - type: rss
+            title: Side Feed
+            style: horizontal-cards
+            limit: 8
+            collapse-after: -1
+            feeds:
+              - url: "https://example.com/feed.xml"
+                limit: 5
+
+  # Second page (optional)
+  - name: Feeds
+    slug: feeds
+    hide-desktop-navigation: false
+    columns:
+      - size: full
+        widgets:
+          - type: rss
+            title: All Feeds
+            style: detailed-list
+            limit: 50
+            preserve-order: true
+            feeds:
+              - url: "https://example.com/a.xml"
+              - url: "https://example.com/b.xml"
+                title: "Custom Title"
+
+# -----------------------------------------------------------------------------
+# Docker/Podman labels for docker-containers widget (on the container, not in YAML):
+#   fast-dashboard.name, fast-dashboard.url, fast-dashboard.icon,
+#   fast-dashboard.category, fast-dashboard.parent
+# -----------------------------------------------------------------------------

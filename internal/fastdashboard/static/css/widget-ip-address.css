@@ -1,0 +1,42 @@
+.ip-address-widget {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Row layout: same as FastAPI – justify-between, consistent spacing */
+.ip-address-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 1.5em;
+}
+
+.ip-address-header-row {
+    margin-bottom: 0;
+}
+
+/* Spacing between rows (match FastAPI margin-top-5) */
+.ip-address-header-row + .ip-address-row,
+.ip-address-row + .ip-address-row {
+    margin-top: 0.5rem;
+}
+
+/* Match Python: size-h3, no extra weight */
+.ip-address-hostname {
+    color: var(--color-text-highlight);
+    font-size: var(--font-size-h3);
+}
+
+.ip-address-interface {
+    font-size: var(--font-size-h5);
+    color: var(--color-text-subdue);
+}
+
+.ip-address-widget .color-subdue {
+    color: var(--color-text-subdue);
+}
+
+.ip-address-widget .color-highlight {
+    color: var(--color-text-highlight);
+}

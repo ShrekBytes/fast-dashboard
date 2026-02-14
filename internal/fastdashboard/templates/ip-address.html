@@ -1,0 +1,24 @@
+{{ template "widget-base.html" . }}
+
+{{ define "widget-content" }}
+<div class="ip-address-widget">
+    {{ if or .Hostname .LocalIPs }}
+    <div class="ip-address-row ip-address-header-row">
+        <span class="ip-address-hostname">{{ if .Hostname }}{{ .Hostname }}{{ else }}—{{ end }}</span>
+        {{ if .LocalIPs }}<span class="ip-address-interface size-h5">{{ (index .LocalIPs 0).Label }}</span>{{ end }}
+    </div>
+    {{ end }}
+    {{ if .LocalIPs }}
+    <div class="ip-address-row">
+        <span class="color-subdue size-h5">Network</span>
+        <span class="color-highlight size-h4">{{ (index .LocalIPs 0).Value }}</span>
+    </div>
+    {{ end }}
+    {{ if .PublicIP }}
+    <div class="ip-address-row">
+        <span class="color-subdue size-h5">{{ .PublicLabel }}</span>
+        <span class="color-highlight size-h4">{{ .PublicIP }}</span>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

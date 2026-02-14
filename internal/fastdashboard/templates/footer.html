@@ -1,0 +1,5 @@
+{{ if ne .App.Config.Branding.Footer "" }}
+<footer class="footer flex items-center flex-column">
+    <div class="size-h3">{{ safeHTML .App.Config.Branding.Footer }}</div>
+</footer>
+{{ end }}

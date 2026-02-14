@@ -1,0 +1,133 @@
+# Fast Dashboard - minimal config example
+# Copy to config.yml and customize
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  base-url: "http://localhost:8080"
+
+branding:
+  app-name: "Fast Dashboard"
+  # Footer text or HTML (e.g. links); leave empty or omit to hide footer
+  footer: "ShrekBytes"
+
+pages:
+  - name: Home
+    hide-desktop-navigation: true
+    center-vertically: true
+    columns:
+      - size: small
+        widgets:
+          - type: clock
+            hour-format: 12h
+
+          # - type: calendar
+          #   first-day-of-week: saturday
+
+          - type: weather
+            location: "Dhaka, Bangladesh"
+            units: metric
+            hour-format: 12h
+
+          - type: ip-address
+            # omit public-url = use default (show public IP); set to "" to hide
+            # interfaces: [wlo1, eth0]  # optional: filter by interface names
+
+          - type: to-do
+            id: main
+
+      - size: full
+        widgets:
+          - type: search
+            search-engine: duckduckgo
+            placeholder: "Search or enter URL…"
+            autofocus: true
+
+          # - type: docker-containers
+            # sock-path: /var/run/docker.sock
+            # format-container-names: true
+            # running-only: false
+
+          - type: monitor
+            title: Services
+            sites:
+              - title: CopyParty
+                url: "http://localhost:3923"
+                icon: "si:nextcloud"
+              - title: OwnCloud
+                url: "https://vw.00022000.xyz"
+                icon: "si:nextcloud"
+              - title: Gitea
+                url: "http://localhost:3000"
+                icon: "si:gitea"
+              - title: Jellyfin
+                url: "http://localhost:8096"
+                icon: "si:jellyfin"
+              - title: Home Assistant
+                url: "http://localhost:8123"
+                icon: "si:homeassistant"
+              - title: Grafana
+                url: "http://localhost:3001"
+                icon: "si:grafana"
+              - title: Prometheus
+                url: "http://localhost:9090"
+                icon: "si:prometheus"
+              - title: Portainer
+                url: "http://localhost:9000"
+                icon: "si:docker"
+
+
+          - type: bookmarks
+            title: Bookmarks
+            groups:
+              - title: General
+                links:
+                  - title: Gmail
+                    url: https://mail.google.com
+                  - title: GitHub
+                    url: https://github.com
+                  - title: Wikipedia
+                    url: https://en.wikipedia.org
+                  - title: DuckDuckGo
+                    url: https://duckduckgo.com
+              - title: News
+                links:
+                  - title: Arch News
+                    url: https://archlinux.org/news/
+                  - title: Hacker News
+                    url: https://news.ycombinator.com
+                  - title: BBC News
+                    url: https://www.bbc.com/news
+              - title: Dev & Docs
+                links:
+                  - title: Go Docs
+                    url: https://go.dev/doc
+                  - title: MDN
+                    url: https://developer.mozilla.org
+                  - title: Stack Overflow
+                    url: https://stackoverflow.com
+              - title: Social
+                links:
+                  - title: Reddit
+                    url: https://www.reddit.com
+                  - title: YouTube
+                    url: https://www.youtube.com
+
+      - size: small
+        widgets:
+          - type: rss
+            title: Movies
+            style: horizontal-cards
+            limit: 8
+            feeds:
+              - url: https://moviesmod.town/feed/
+                limit: 8
+        
+          - type: rss
+            title: News
+            style: list
+            limit: 10
+            collapse-after: 5
+            feeds:
+              - url: https://archlinux.org/feeds/news/
+                title: Arch Linux

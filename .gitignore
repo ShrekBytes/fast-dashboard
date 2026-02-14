@@ -1,0 +1,25 @@
+# Binary
+/fast-dashboard
+*.exe
+
+# Local config (may contain secrets)
+config/config.yml
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build and test
+*.test
+*.out
+/coverage.txt
+
+# Temporary
+*.log
+*.tmp
+.env
+.env.*

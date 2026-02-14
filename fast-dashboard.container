@@ -1,0 +1,34 @@
+[Unit]
+Description=Fast Dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=will be updated later
+ContainerName=fast-dashboard
+AutoUpdate=registry
+
+# change ip and port from config.yml
+Network=host
+
+# Environment file
+EnvironmentFile=%h/self-hosted/fast-dashboard/.env
+
+# Persistent storage
+Volume=%h/self-hosted/fast-dashboard/config:/app/config:Z
+Volume=%h/self-hosted/fast-dashboard/assets:/app/assets:Z
+Volume=/etc/localtime:/etc/localtime:ro
+
+# Optional Docker socket (only if you need container widget)
+# Volume=/var/run/docker.sock:/var/run/docker.sock:ro
+
+# Port mapping (will not work when on Network=host)
+# PublishPort=9999:8080
+
+[Service]
+# Restart behavior
+Restart=on-failure
+
+
+[Install]
+WantedBy=default.target
