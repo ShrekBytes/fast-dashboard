@@ -149,7 +149,7 @@ Defaults to **http://localhost:8080**. Host and port are set in `config.yml` und
 
 ## Configuration
 
-Single YAML config drives everything. Full reference: **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)**. The Docker curl install uses the minimal example in `quick-start/dash-dash-dash/config/config.yml`.
+Single YAML config drives everything. Full reference: **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)**. The Docker and Docker Compose quick-start use the minimal example in `quick-start/dash-dash-dash/config/config.yml`.
 
 ### Config file location
 
