@@ -7,7 +7,6 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png)
 
----
 
 ## Table of contents
 
@@ -39,11 +38,8 @@ Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more
 - [Troubleshooting](#troubleshooting)
 - [Credits and license](#credits-and-license)
 
----
 
 ## Installation
-
----
 
 ### Recommended: Docker Compose
 
@@ -70,7 +66,7 @@ Host and port are set in `config.yml` under `server`.
 - **Stop:** `docker compose down`
 - **Update image:** `docker compose pull && docker compose up -d`
 
----
+##
 
 ### Docker / Podman Manual
 
@@ -97,7 +93,7 @@ docker run -d --name dash-dash-dash --restart on-failure \
 
 If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
 
----
+##
 
 ### Podman quadlet
 
@@ -126,7 +122,7 @@ To start at login: `systemctl --user enable dash-dash-dash.service`.
 
 If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remove the `EnvironmentFile=` line from the quadlet file.
 
----
+##
 
 ### Run with Go (no Docker)
 
@@ -149,7 +145,7 @@ If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remov
 
 **Open** [http://localhost:8080](http://localhost:8080) (or the host/port set in `config.yml` under `server`).
 
----
+##
 
 ## Usage
 
