@@ -1,8 +1,9 @@
 # DASH-DASH-DASH
 
-A minimal, fast dashboard for your browser new-tab or home page. Clock, weather, search, bookmarks, to-do, service checks, RSS—whatever you want. Single binary or one container, no fuss.
+A minimal, fast dashboard specially made for browser new-tab or home page.
+Clock, weather, search, bookmarks, to-do, service checks, RSS.
 
-![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
+This is a stripped-down version of [Glance](https://github.com/glanceapp/glance). For a more feature-rich dashboard, use Glance. This is just fast and minimal with only neccessary widgets.
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png) 
 
@@ -42,17 +43,16 @@ A minimal, fast dashboard for your browser new-tab or home page. Clock, weather,
 
 ## Installation
 
-### Recommended: curl + Docker
+### Recommended: Docker
 
-Download the ready-to-use folder (config + `.env` + `docker-compose.yml`), then start with Docker. One copy-paste.
+Automatically creates and download neccesary folders and files and starts the docker composer
 
 ```bash
 curl -sL https://github.com/ShrekBytes/dash-dash-dash/archive/refs/heads/main.tar.gz | tar xz && cd dash-dash-dash-main/quick-start/dash-dash-dash && docker compose up -d
 ```
 
-You get a folder with `config/`, `.env`, and `docker-compose.yml`. The app runs in the background.
 
-- **First time:** Open **http://localhost:8080**. Set it as your new-tab or homepage if you like.
+Open **http://localhost:8080**.
 - **Stop:** In that folder, run `docker compose down`.
 - **Update:** `docker compose pull && docker compose up -d`
 
@@ -60,7 +60,12 @@ You get a folder with `config/`, `.env`, and `docker-compose.yml`. The app runs 
 
 ### Docker / Podman by hand
 
-Use the image `ghcr.io/shrekbytes/dash-dash-dash:latest`. You need a folder with `config.yml` (and optionally `.env`). Mount that folder at `/app/config` and pass the env file if used.
+create a folder for example dash-dash-dash
+mkdir -p ~/dash-dash-dash && cd ~/dash-dash-dash
+create a config folder and [link of config file]config file and the .env file(optional)
+mkdir -p config && touch config.yml .env
+copy our preconfigured config in the config file starting config file link, full config file link
+then run docker or podman
 
 Example (Docker):
 
@@ -74,7 +79,8 @@ docker run -d --name dash-dash-dash --restart on-failure \
   ghcr.io/shrekbytes/dash-dash-dash:latest
 ```
 
-The app reads `config.yml` from `/app/config/config.yml` inside the container.
+for podman just write podman in places of docker in the above command
+
 
 ---
 
@@ -82,47 +88,47 @@ The app reads `config.yml` from `/app/config/config.yml` inside the container.
 
 The repo includes `quick-start/dash-dash-dash/dash-dash-dash.container` for Podman quadlet. It expects the dashboard data at **`~/dash-dash-dash`**: that folder should contain `.env`, `config/`, and optionally `assets/`.
 
-1. Copy or symlink the `quick-start/dash-dash-dash` folder to `~/dash-dash-dash`.
-2. Copy the container file to your quadlet directory, e.g. `~/.config/containers/containers/dash-dash-dash.container`.
-3. Run `podman generate systemd --new --name dash-dash-dash` or let your system manage the unit; the container file uses `AutoUpdate=registry`.
-
+copy the container file to the ~/.config/container/systemd folder 
+and restart user daemon reload
+run systemctl --user start ~/config/container/system/dash-dash-dash.container
 ---
 
 ### Run with Go (no Docker)
 
-You need Go 1.21+. Put a `config.yml` in the same directory (e.g. copy [quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml) and edit), then:
+need Go 1.21+.
+P`config.yml` file should be in the same directory (e.g. copy [quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml) and edit), then:
 
 ```bash
 go build -o dash-dash-dash .
 ./dash-dash-dash
 ```
 
-Or specify a config file:
+Or specify a config file if not in parent directory:
 
 ```bash
-go build -o dash-dash-dash . && ./dash-dash-dash -config config.example.yml
+go build -o dash-dash-dash . && ./dash-dash-dash -config path/config.example.yml
 ```
 
 ---
 
-## Quick start
+## Usage
 
-After installation, open **http://localhost:8080** (or the host/port you set in `server.port` and `server.base-url`). Set your browser’s new-tab or homepage to this URL to use the dashboard as your start page.
+by default it runs on **http://localhost:8080** (port and host can be changed in config.yml files too)
 
 ---
 
 ## Configuration
 
-All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)** — copy and trim to your needs. The curl install uses a minimal example in `quick-start/dash-dash-dash/config/config.yml`.
+All behavior is driven by a single YAML config file. Full reference (every section and widget option documented): **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)** The curl install uses a minimal example in `quick-start/dash-dash-dash/config/config.yml`.
 
 ### Config file location
 
-- **Docker/Podman:** The app expects `config.yml` at `/app/config/config.yml` (mount your folder at `/app/config`).
+- **Docker/Podman:** The app expects `config.yml` at `/app/config/config.yml`
 - **Go binary:** By default the binary looks for `config.yml` in the current working directory. Override with `-config /path/to/config.yml`.
 
 ### Includes
 
-You can split config into multiple files and include them:
+splitting config into multiple files and including them is possible and recommended:
 
 ```yaml
 # In your main config.yml:
@@ -134,7 +140,7 @@ Paths are relative to the file that contains the `$include`. Recursion limit is 
 
 ### Hot reload
 
-When you change the config file on disk, the app reloads it automatically (fsnotify). Refresh the browser to see changes; no need to restart the container or binary for most edits. Changes to `.env` require a restart.
+changes to the config file does not need restart as it supports hot reload. Changes to `.env` require a restart.
 
 ---
 
@@ -221,7 +227,7 @@ For every option and example, see **[quick-start/config.example.full.yml](https:
 
 A background job refreshes widgets that are due every 5 minutes. Static assets are cached 24 h; HTML/API responses are no-cache.
 
-**Health endpoint:** `GET /api/healthz` returns 200 when the app is up. Useful for reverse proxies or monitoring.
+**Health endpoint:** `GET /api/healthz` returns 200 when the app is up.
 
 ---
 
