@@ -92,32 +92,6 @@ docker run -d --name dash-dash-dash --restart on-failure \
 
 If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
 
-## Working folder structure
-
-When you run DASH-DASH-DASH (e.g. from `~/dash-dash-dash` with Docker or Compose), your working directory typically looks like this:
-
-```
-~/dash-dash-dash/
-├── config/
-│   ├── config.yml          # Main config (required)
-│   ├── page1.yml           # Optional: extending config
-│   ├── page2.yml           # Optional: extending config
-│   └── ...
-├── assets/                 # Optional: custom files served at /assets/
-│   ├── custom.css
-│   ├── logo.png
-│   ├── favicon.ico
-│   └── ...                 # Any other images or static files
-├── .env                    # Optional: env vars for config
-└── docker-compose.yml      # When using Docker Compose
-```
-
-- **config/** — Required. Must contain `config.yml`. Add extra files (e.g. `page1.yml`, `page2.yml`) and reference them in config with `$include: page1.yml` etc.
-- **assets/** — Optional. Files here are served at `/assets/`. Use for custom CSS (`theme.custom-css-file`), logo, favicon, or widget icons. With Docker/Podman, mount this folder at `/app/assets` (the compose file does this by default).
-- **.env** — Optional, restart the app after changing.
-
-**Go binary (no Docker):** Use the same layout; put `config.yml` in the current working directory (or pass `-config path/to/config.yml`).
-
 ##
 
 ### Podman quadlet
@@ -165,6 +139,34 @@ If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remov
    ```bash
    ./dash-dash-dash -config path/to/config.yml
    ```
+
+##
+
+## Working folder structure
+
+When you run DASH-DASH-DASH (e.g. from `~/dash-dash-dash` with Docker or Compose), your working directory typically looks like this:
+
+```
+~/dash-dash-dash/
+├── config/
+│   ├── config.yml          # Main config (required)
+│   ├── page1.yml           # Optional: extending config
+│   ├── page2.yml           # Optional: extending config
+│   └── ...
+├── assets/                 # Optional: custom files served at /assets/
+│   ├── custom.css
+│   ├── logo.png
+│   ├── favicon.ico
+│   └── ...                 # Any other images or static files
+├── .env                    # Optional: env vars for config
+└── docker-compose.yml      # When using Docker Compose
+```
+
+- **config/** — Required. Must contain `config.yml`. Add extra files (e.g. `page1.yml`, `page2.yml`) and reference them in config with `$include: page1.yml` etc.
+- **assets/** — Optional. Files here are served at `/assets/`. Use for custom CSS (`theme.custom-css-file`), logo, favicon, or widget icons. With Docker/Podman, mount this folder at `/app/assets` (the compose file does this by default).
+- **.env** — Optional, restart the app after changing.
+
+**Go binary (no Docker):** Use the same layout; put `config.yml` in the current working directory (or pass `-config path/to/config.yml`).
 
 ##
 
