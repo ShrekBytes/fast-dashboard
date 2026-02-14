@@ -95,14 +95,14 @@ Compose mounts `./config` and the Docker socket.
 
 **Podman (Quadlet)**
 
-Copy the Quadlet file to `~/.config/containers/systemd/`, set `Image=` to your image (required for `AutoUpdate=registry`), and ensure config exists at the paths in the file (default: `%h/self-hosted/fast-dashboard/config` and `assets`). Uses `Network=host` — set `server.host` and `server.port` in `config.yml` to match. Optional: `EnvironmentFile` for env vars; uncomment the Docker socket volume for the container widget.
+Copy the Quadlet file to `~/.config/containers/systemd/`. The image is set to `ghcr.io/shrekbytes/fast-dashboard:latest` (required for `AutoUpdate=registry`). Ensure config exists at the paths in the file (default: `%h/self-hosted/fast-dashboard/config` and `assets`). Uses `Network=host` — set `server.host` and `server.port` in `config.yml` to match. Optional: `EnvironmentFile` for env vars; uncomment the Docker socket volume for the container widget.
 
 ```bash
 mkdir -p ~/self-hosted/fast-dashboard/config ~/self-hosted/fast-dashboard/assets
 cp config.example.yml ~/self-hosted/fast-dashboard/config/config.yml
 
 cp fast-dashboard.container ~/.config/containers/systemd/
-# Edit Image= in the .container file (e.g. ghcr.io/you/fast-dashboard:latest)
+# Image=ghcr.io/shrekbytes/fast-dashboard:latest (already set in the file)
 
 systemctl --user daemon-reload
 systemctl --user enable --now fast-dashboard
