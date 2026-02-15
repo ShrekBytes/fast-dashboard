@@ -543,8 +543,8 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 - `collapse-after` — Show "Load more" button after N items (`-1` disables)
 - `preserve-order` — Don't reorder by date (keep feed order)
 - `single-line-titles` — Truncate long titles
-- `thumbnail-height` — Thumbnail height for card styles (only horizontal-cards-2 style)
-- `card-height` — Card height for card styles (only horizontal-cards style)
+- `thumbnail-height` — Thumbnail height in pixels (only for `horizontal-cards-2` style)
+- `card-height` — Card height in pixels (only for `horizontal-cards` style)
 - `feeds` — List of RSS/Atom feed configurations
 
 **Per-Feed Options:**
@@ -553,6 +553,7 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 - `limit` — Per-feed item limit (0 = use widget limit)
 - `hide-categories` — Hide category tags
 - `hide-description` — Hide item description
+- `item-link-prefix` — Prepend this URL to all item links (useful for privacy proxies like Nitter)
 - `headers` — Custom HTTP headers for feed requests
 
 **Display Styles:**
@@ -580,7 +581,7 @@ Widgets that fetch external data (Weather, RSS, Monitor, IP Address) support cli
 - **Monitor** — Checks service status
 - **IP Address** — Updates IP information
 
-Refreshable widget titles show hover effects (pointer cursor and color change) to indicate.
+Refreshable widget titles show hover effects (pointer cursor and color change) to indicate they are clickable.
 
 ##
 
