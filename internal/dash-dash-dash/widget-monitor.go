@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"html/template"
+	"net"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"sync"
@@ -14,6 +16,14 @@ import (
 const uptimeHistoryMaxEntries = 10
 
 var uptimeHistory = newUptimeHistoryStore(uptimeHistoryMaxEntries)
+
+// Internet connectivity state
+var (
+	internetAvailableMu    sync.RWMutex
+	internetAvailable      bool = true
+	lastInternetCheck      time.Time
+	internetCheckCacheSecs = 10 // Cache internet status for 10 seconds
+)
 
 type uptimeHistoryStore struct {
 	mu    sync.Mutex
@@ -64,49 +74,116 @@ type monitorWidget struct {
 		StatusStyle        string          `yaml:"-"`
 		AltStatusCodes     []int           `yaml:"alt-status-codes"`
 		History            []bool          `yaml:"-"` // last N up/down results for uptime dots
+		IsLocal            bool            `yaml:"-"` // true if site is on local network
 	} `yaml:"sites"`
-	Style           string `yaml:"style"`
-	ShowFailingOnly bool   `yaml:"show-failing-only"`
-	HasFailing      bool   `yaml:"-"`
+	Style               string `yaml:"style"`
+	ShowFailingOnly     bool   `yaml:"show-failing-only"`
+	ShowInternetStatus  bool   `yaml:"show-internet-status"`
+	HasFailing          bool   `yaml:"-"`
+	InternetStatus      *siteStatus `yaml:"-"`
+	InternetAvailable   bool        `yaml:"-"`
 }
 
 func (widget *monitorWidget) initialize() error {
 	widget.withTitle("Monitor").withCacheDuration(5 * time.Minute)
+	// Determine which sites are local
+	for i := range widget.Sites {
+		widget.Sites[i].IsLocal = isLocalURL(widget.Sites[i].DefaultURL)
+	}
 	return nil
 }
 
 func (widget *monitorWidget) update(ctx context.Context) {
-	requests := make([]*SiteStatusRequest, len(widget.Sites))
+	// Check internet connectivity
+	internetUp := checkInternetConnectivity()
+	widget.InternetAvailable = internetUp
+
+	// Check internet status for display if enabled
+	if widget.ShowInternetStatus {
+		if internetUp {
+			widget.InternetStatus = &siteStatus{
+				Code:         200,
+				ResponseTime: 0,
+				Error:        nil,
+			}
+		} else {
+			widget.InternetStatus = &siteStatus{
+				Code:  0,
+				Error: errors.New("no internet connection"),
+			}
+		}
+	}
+
+	// Determine which sites to check based on internet availability
+	var requestsToCheck []*SiteStatusRequest
+	var indicesToCheck []int
+
 	for i := range widget.Sites {
-		requests[i] = widget.Sites[i].SiteStatusRequest
+		site := &widget.Sites[i]
+		if internetUp || site.IsLocal {
+			requestsToCheck = append(requestsToCheck, site.SiteStatusRequest)
+			indicesToCheck = append(indicesToCheck, i)
+		}
 	}
 
-	statuses, err := fetchStatusForSites(requests)
-	if !widget.canContinueUpdateAfterHandlingErr(err) {
-		return
+	if len(requestsToCheck) > 0 {
+		statuses, err := fetchStatusForSites(requestsToCheck)
+		if !widget.canContinueUpdateAfterHandlingErr(err) {
+			return
+		}
+
+		// Update checked sites
+		for j, i := range indicesToCheck {
+			site := &widget.Sites[i]
+			status := &statuses[j]
+			site.Status = status
+
+			isUp := (status.Code == 200 || slices.Contains(site.AltStatusCodes, status.Code)) && status.Error == nil
+			uptimeHistory.record(site.DefaultURL, isUp)
+			site.History = uptimeHistory.get(site.DefaultURL)
+
+			if status.Error != nil && site.ErrorURL != "" {
+				site.URL = site.ErrorURL
+			} else {
+				site.URL = site.DefaultURL
+			}
+			site.StatusText = statusCodeToText(status.Code, status.TimedOut, status.Error, site.AltStatusCodes)
+			site.StatusStyle = statusCodeToStyle(status.Code, status.TimedOut, status.Error, site.AltStatusCodes)
+		}
 	}
 
+	// Handle remote sites when internet is down (don't check, mark as unknown)
+	for i := range widget.Sites {
+		site := &widget.Sites[i]
+		if !internetUp && !site.IsLocal {
+			// Don't update status or history - freeze last known state
+			if site.Status == nil {
+				site.Status = &siteStatus{}
+			}
+			site.StatusText = "Unknown"
+			site.StatusStyle = "unknown"
+			site.URL = site.DefaultURL
+			site.History = uptimeHistory.get(site.DefaultURL) // Keep last known history
+		}
+	}
+
+	// Check if any sites are failing
 	widget.HasFailing = false
 	for i := range widget.Sites {
 		site := &widget.Sites[i]
-		status := &statuses[i]
-		site.Status = status
-
-		isUp := (status.Code == 200 || slices.Contains(site.AltStatusCodes, status.Code)) && status.Error == nil
-		uptimeHistory.record(site.DefaultURL, isUp)
-		site.History = uptimeHistory.get(site.DefaultURL)
-
-		if !slices.Contains(site.AltStatusCodes, status.Code) && (status.Code >= 400 || status.Error != nil) {
+		if site.StatusStyle == "error" {
 			widget.HasFailing = true
+			break
 		}
-		if status.Error != nil && site.ErrorURL != "" {
-			site.URL = site.ErrorURL
-		} else {
-			site.URL = site.DefaultURL
-		}
-		site.StatusText = statusCodeToText(status.Code, site.AltStatusCodes)
-		site.StatusStyle = statusCodeToStyle(status.Code, site.AltStatusCodes)
 	}
+
+	// Adjust cache duration if internet is down (check more frequently)
+	if !internetUp {
+		widget.withCacheDuration(60 * time.Second) // Check every minute when internet is down
+	} else {
+		widget.withCacheDuration(5 * time.Minute) // Normal 5-minute interval
+	}
+
 	widget.withError(nil).scheduleNextUpdate()
 }
 
@@ -117,32 +194,46 @@ func (widget *monitorWidget) Render() template.HTML {
 	return widget.renderTemplate(widget, monitorWidgetTemplate)
 }
 
-func statusCodeToText(status int, altStatusCodes []int) string {
-	if status == 200 || slices.Contains(altStatusCodes, status) {
-		return "OK"
+func statusCodeToText(status int, timedOut bool, err error, altStatusCodes []int) string {
+	// Handle timeout
+	if timedOut {
+		return "Timeout"
 	}
-	if status == 404 {
-		return "Not Found"
+
+	// Handle connection errors (no status code)
+	if err != nil && status == 0 {
+		return "Connection Error"
 	}
-	if status == 403 {
-		return "Forbidden"
+
+	// Handle status codes - always show the actual code
+	if status > 0 {
+		return strconv.Itoa(status)
 	}
-	if status == 401 {
-		return "Unauthorized"
-	}
-	if status >= 500 {
-		return "Server Error"
-	}
-	if status >= 400 {
-		return "Client Error"
-	}
-	return strconv.Itoa(status)
+
+	return "Unknown"
 }
 
-func statusCodeToStyle(status int, altStatusCodes []int) string {
+func statusCodeToStyle(status int, timedOut bool, err error, altStatusCodes []int) string {
+	// Unknown status (no error, no code) - shouldn't happen but handle it
+	if status == 0 && err == nil {
+		return "unknown"
+	}
+
+	// Success: 200 or in alt status codes list
 	if status == 200 || slices.Contains(altStatusCodes, status) {
 		return "ok"
 	}
+
+	// Error: timeout, connection error, or bad status code
+	if timedOut || err != nil || status >= 400 {
+		return "error"
+	}
+
+	// Other 2xx, 3xx codes
+	if status >= 200 && status < 400 {
+		return "ok"
+	}
+
 	return "error"
 }
 
@@ -172,7 +263,7 @@ func fetchSiteStatusTask(statusRequest *SiteStatusRequest) (siteStatus, error) {
 		url = statusRequest.DefaultURL
 	}
 
-	timeout := ternary(statusRequest.Timeout > 0, time.Duration(statusRequest.Timeout), 3*time.Second)
+	timeout := ternary(statusRequest.Timeout > 0, time.Duration(statusRequest.Timeout), 7*time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -212,4 +303,104 @@ func fetchStatusForSites(requests []*SiteStatusRequest) ([]siteStatus, error) {
 		return nil, err
 	}
 	return results, nil
+}
+
+// checkInternetConnectivity checks if internet is available
+// Uses cached result if checked recently
+func checkInternetConnectivity() bool {
+	internetAvailableMu.RLock()
+	if time.Since(lastInternetCheck).Seconds() < float64(internetCheckCacheSecs) {
+		result := internetAvailable
+		internetAvailableMu.RUnlock()
+		return result
+	}
+	internetAvailableMu.RUnlock()
+
+	// Need to check - upgrade to write lock
+	internetAvailableMu.Lock()
+	defer internetAvailableMu.Unlock()
+
+	// Double-check after acquiring write lock
+	if time.Since(lastInternetCheck).Seconds() < float64(internetCheckCacheSecs) {
+		return internetAvailable
+	}
+
+	// Try multiple privacy-focused endpoints
+	endpoints := []string{
+		"1.1.1.1:443",   // Cloudflare DNS
+		"9.9.9.9:443",   // Quad9 DNS
+	}
+
+	for _, endpoint := range endpoints {
+		conn, err := net.DialTimeout("tcp", endpoint, 7*time.Second)
+		if err == nil {
+			conn.Close()
+			internetAvailable = true
+			lastInternetCheck = time.Now()
+			return true
+		}
+	}
+
+	// All checks failed - internet is down
+	internetAvailable = false
+	lastInternetCheck = time.Now()
+	return false
+}
+
+// isLocalURL determines if a URL points to a local/private network
+func isLocalURL(urlStr string) bool {
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		return false
+	}
+
+	host := parsedURL.Hostname()
+
+	// Check for localhost variants
+	if host == "localhost" || host == "" {
+		return true
+	}
+
+	// Parse IP address
+	ip := net.ParseIP(host)
+	if ip == nil {
+		// Try to resolve hostname
+		addrs, err := net.LookupIP(host)
+		if err != nil || len(addrs) == 0 {
+			return false
+		}
+		ip = addrs[0]
+	}
+
+	// Check if it's a loopback address
+	if ip.IsLoopback() {
+		return true
+	}
+
+	// Check for private IP ranges
+	if ip.IsPrivate() {
+		return true
+	}
+
+	// Additional check for 0.0.0.0
+	if ip.String() == "0.0.0.0" || ip.String() == "::" {
+		return true
+	}
+
+	// Check specific private ranges (redundant with IsPrivate() but explicit)
+	privateRanges := []string{
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+		"127.0.0.0/8",
+	}
+
+	for _, cidr := range privateRanges {
+		_, subnet, _ := net.ParseCIDR(cidr)
+		if subnet != nil && subnet.Contains(ip) {
+			return true
+		}
+	}
+
+	return false
 }

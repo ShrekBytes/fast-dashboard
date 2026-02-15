@@ -111,6 +111,7 @@ pages:
             title: Services
             style: ""                  # "" | compact
             show-failing-only: false   # true = only show failing sites
+            show-internet-status: false # true = show internet connectivity at top
             sites:
               - title: My App
                 url: http://localhost:3000
@@ -118,7 +119,7 @@ pages:
                 same-tab: false
                 # check-url: "http://localhost:3000/health"   # URL used for health check (default: url)
                 # allow-insecure: true                       # skip TLS verify
-                # timeout: 5s                                # 3s default; format: 1s, 2m, 1h
+                # timeout: 7s                                # 7s default; format: 1s, 5s, 1m, 1h
                 # error-url: "http://localhost:3000/status"   # link when down
                 # alt-status-codes: [301, 302]               # treat as success
                 # basic-auth:

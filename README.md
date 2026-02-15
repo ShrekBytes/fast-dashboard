@@ -1,356 +1,827 @@
 # DASH-DASH-DASH
 
-Minimal, fast dashboard: clock, weather, search, bookmarks, to-do, service checks, RSS. Lightweight—runs well as a browser new-tab or home page.
+> Minimal, blazing-fast dashboard for your homelab or new-tab page
 
-Stripped-down version of [Glance](https://github.com/glanceapp/glance). For more features, use Glance; for less and lightning-fast, this is it.
+**Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
+A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Perfect for browser new-tab pages, homelab dashboards, or quick-access portals.
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png)
 
+---
 
-## Table of contents
+## Quick Links
+
+**[Configuration Examples](quick-start/config.example.full.yml)** • **[Widget Reference](#widgets)** • **[Installation](#installation)**
+
+---
+
+## Table of Contents
 
 - [Installation](#installation)
-  - [Recommended: Docker Compose](#recommended-docker-compose)
-  - [Docker / Podman Manual](#docker--podman-manual)
-  - [Podman quadlet](#podman-quadlet)
-  - [Run with Go (no Docker)](#run-with-go-no-docker)
-- [Working folder structure](#working-folder-structure)
-- [Usage](#usage)
+  - [Docker Compose](#docker-compose)
+  - [Docker/Podman](#dockerpodman)
+  - [Podman Quadlet](#podman-quadlet)
+  - [Go Binary](#go-binary)
 - [Configuration](#configuration)
-  - [Config file location](#config-file-location)
-  - [Includes](#includes)
-  - [Hot reload](#hot-reload)
-- [Config reference](#config-reference)
-  - [Top-level sections](#top-level-sections)
-  - [Pages and columns](#pages-and-columns)
+  - [File Structure](#file-structure)
+  - [Config Reference](#config-reference)
+  - [Hot Reload](#hot-reload)
 - [Widgets](#widgets)
   - [Clock](#clock)
   - [Calendar](#calendar)
   - [Weather](#weather)
-  - [IP address](#ip-address)
-  - [To-do](#to-do)
+  - [IP Address](#ip-address)
+  - [To-Do](#to-do)
   - [Search](#search)
-  - [Service monitor](#service-monitor)
+  - [Monitor](#monitor)
   - [Bookmarks](#bookmarks)
   - [RSS](#rss)
-- [Caching and refresh](#caching-and-refresh)
-- [CLI](#cli)
+- [Advanced](#advanced)
+  - [Custom CSS & Assets](#custom-css--assets)
+  - [Environment Variables](#environment-variables)
+  - [CLI Commands](#cli-commands)
 - [Troubleshooting](#troubleshooting)
-- [Credits and license](#credits-and-license)
+- [License](#license)
+
+---
 
 
 ## Installation
 
-### Recommended: Docker Compose
+Default URL: **http://localhost:8080** (configurable in `config.yml`)
 
-1. **Create a project directory** and add config + compose file:
+### Docker Compose
 
+**Recommended method** — easiest setup and updates.
+
+1. Create project directory:
    ```bash
    mkdir -p ~/dash-dash-dash/config
+   cd ~/dash-dash-dash
    ```
 
-   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
-   - Copy [quick-start/dash-dash-dash/docker-compose.yml](quick-start/dash-dash-dash/docker-compose.yml) to `~/dash-dash-dash/docker-compose.yml`.
-   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
+2. Copy starter files:
+   - [quick-start/dash-dash-dash/docker-compose.yml](quick-start/dash-dash-dash/docker-compose.yml) → `docker-compose.yml`
+   - [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) → `config/config.yml`
 
-2. **Start the stack:**
-
+3. Start:
    ```bash
-   cd ~/dash-dash-dash && docker compose up -d
+   docker compose up -d
    ```
 
-**Useful commands** (run from `~/dash-dash-dash`):
-
+**Management:**
 - **Stop:** `docker compose down`
-- **Update image:** `docker compose pull && docker compose up -d`
+- **Update:** `docker compose pull && docker compose up -d`
+- **Logs:** `docker compose logs -f`
 
-##
+---
 
-### Docker / Podman Manual
+### Docker/Podman
 
-**Create a project directory** and add config (and optionally `.env`):
-
+1. Create project directory:
    ```bash
    mkdir -p ~/dash-dash-dash/config
    ```
 
-   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
-   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
+2. Copy [config.yml](quick-start/dash-dash-dash/config/config.yml) → `~/dash-dash-dash/config/config.yml`
 
-**Docker:**
+3. Run:
+   ```bash
+   docker run -d --name dash-dash-dash \
+     --restart on-failure \
+     --network host \
+     -v ~/dash-dash-dash/config:/app/config:Z \
+     ghcr.io/shrekbytes/dash-dash-dash:latest
+   ```
 
-```bash
-docker run -d --name dash-dash-dash --restart on-failure \
-  --network host \
-  -v ~/dash-dash-dash/config:/app/config:Z \
-  -v ~/dash-dash-dash/.env:/app/.env:ro \
-  ghcr.io/shrekbytes/dash-dash-dash:latest
-```
+Replace `docker` with `podman` if using Podman.
 
-**Podman:** Replace `docker` with `podman` in the command above.
+---
 
-If you don't use `.env`, omit the `-v .../.env:/app/.env:ro` line (or create an empty file).
+### Podman Quadlet
 
-##
-
-### Podman quadlet
-
-1. **Create the project directory** and add config (and optionally `.env`):
-
+1. Create project directory:
    ```bash
    mkdir -p ~/dash-dash-dash/config
-   ```
-   - Copy [quick-start/dash-dash-dash/config/config.yml](quick-start/dash-dash-dash/config/config.yml) to `~/dash-dash-dash/config/config.yml`.
-   - (Optional) Create `~/dash-dash-dash/.env` if you need environment variables in config.
-
-2. **Copy the quadlet file** to the systemd user drop-in directory:
-
-   ```bash
    mkdir -p ~/.config/containers/systemd
    ```
-   Copy [quick-start/dash-dash-dash/dash-dash-dash.container](quick-start/dash-dash-dash/dash-dash-dash.container) to `~/.config/containers/systemd/dash-dash-dash.container`
-   
-3. **Reload and start:**
 
+2. Copy files:
+   - [config.yml](quick-start/dash-dash-dash/config/config.yml) → `~/dash-dash-dash/config/config.yml`
+   - [dash-dash-dash.container](quick-start/dash-dash-dash/dash-dash-dash.container) → `~/.config/containers/systemd/dash-dash-dash.container`
+
+3. Start:
    ```bash
    systemctl --user daemon-reload
-   systemctl --user start dash-dash-dash.service
+   systemctl --user enable --now dash-dash-dash.service
    ```
 
-If you don't use `.env`, either create an empty `~/dash-dash-dash/.env` or remove the `EnvironmentFile=` line from the quadlet file.
+---
 
-##
+### Go Binary
 
-### Run with Go (no Docker)
+**Requirements:** Go 1.21+
 
-**Requires Go 1.21+.**
-
-1. Copy a starter config to `config.yml` in your working directory.
+1. Copy [config.yml](quick-start/dash-dash-dash/config/config.yml) to your working directory
 
 2. Build and run:
-
    ```bash
    go build -o dash-dash-dash .
    ./dash-dash-dash
    ```
 
-   Or with an explicit config path:
-
+   Or specify config path:
    ```bash
-   ./dash-dash-dash -config path/to/config.yml
+   ./dash-dash-dash -config /path/to/config.yml
    ```
 
-##
-
-## Working folder structure
-
-When you run DASH-DASH-DASH (e.g. from `~/dash-dash-dash` with Docker or Compose), your working directory typically looks like this:
-
-```
-~/dash-dash-dash/
-├── config/
-│   ├── config.yml          # Main config (required)
-│   ├── page1.yml           # Optional: extending config
-│   ├── page2.yml           # Optional: extending config
-│   └── ...
-├── assets/                 # Optional: custom files served at /assets/
-│   ├── custom.css
-│   ├── logo.png
-│   ├── favicon.ico
-│   └── ...                 # Any other images or static files
-├── .env                    # Optional: env vars for config
-└── docker-compose.yml      # When using Docker Compose
-```
-
-- **config/** — Required. Must contain `config.yml`. Add extra files (e.g. `page1.yml`, `page2.yml`) and reference them in config with `$include: page1.yml` etc.
-- **assets/** — Optional. Files here are served at `/assets/`. Use for custom CSS (`theme.custom-css-file`), logo, favicon, or widget icons. With Docker/Podman, mount this folder at `/app/assets` (the compose file does this by default).
-- **.env** — Optional, restart the app after changing.
-
-**Go binary (no Docker):** Use the same layout; put `config.yml` in the current working directory (or pass `-config path/to/config.yml`).
-
-##
-
-### Usage
-
-Defaults to **http://localhost:8080**. Host and port are set in `config.yml` under `server`.
-
-##
+---
 
 ## Configuration
 
-Single YAML config drives everything. Full reference: **[quick-start/config.example.full.yml](https://github.com/ShrekBytes/dash-dash-dash/blob/main/quick-start/config.example.full.yml)**. The Docker and Docker Compose quick-start use the minimal example in `quick-start/dash-dash-dash/config/config.yml`.
+Configuration is done via a single YAML file. See [config.example.full.yml](quick-start/config.example.full.yml) for complete reference.
 
-### Config file location
+### File Structure
 
-- **Docker/Podman:** `config.yml` at `/app/config/config.yml` (mount the folder at `/app/config`).
-- **Go binary:** Current working directory, or `-config /path/to/config.yml`.
-
-### Includes
-
-Config can be split into multiple files and included:
-
-```yaml
-# In the main config:
-pages:
-  - $include: partials/home-page.yml
+**Typical project layout:**
+```
+~/dash-dash-dash/
+├── config/
+│   ├── config.yml       # Main config (required)
+│   ├── pages/           # Optional: split config
+│   │   ├── home.yml
+│   │   └── feeds.yml
+│   └── ...
+├── assets/              # Optional: custom CSS, icons, images
+│   ├── user.css
+│   ├── logo.png
+│   └── favicon.ico
+├── .env                 # Optional: environment variables
+└── docker-compose.yml   # If using Docker Compose
 ```
 
-Paths are relative to the file that contains the `$include`. Recursion limit: 20.
+**File locations:**
+- **Docker/Podman:** Mount config folder to `/app/config/` (config file at `/app/config/config.yml`)
+- **Go binary:** Current directory or use `-config /path/to/config.yml`
 
-### Hot reload
+### Config Reference
 
-Config file changes are applied without restart; reload the page. `.env` changes require a restart.
+#### Top-Level Sections
 
-##
+```yaml
+server:
+  host: "0.0.0.0"
+  port: 8080
+  base-url: http://localhost:8080
+  assets-path: /path/to/assets    # Optional
 
-## Config reference
+document:
+  head: "<meta name='...' content='...'>"    # Optional HTML in <head>
 
-### Top-level sections
+theme:
+  background-color: "240 15 9"    # HSL: hue saturation lightness
+  primary-color: "43 50 70"
+  contrast-multiplier: 1.1
+  text-saturation-multiplier: 1.0
+  positive-color: "120 50 50"     # Optional
+  negative-color: "0 50 50"       # Optional
+  light: false                     # Light theme
+  custom-css-file: /assets/user.css    # Optional
 
-| Section | Purpose |
-|--------|--------|
-| `server` | `host`, `port`, `base-url`. Optional: `assets-path`. |
-| `document` | Optional `head`: HTML injected into `<head>`. |
-| `theme` | `background-color`, `primary-color` (HSL: `"hue sat light"`), `contrast-multiplier`, `text-saturation-multiplier`. Optional: `positive-color`, `negative-color`, `light`, `custom-css-file`. |
-| `branding` | `app-name`, `footer` (plain text or HTML; empty = hide). Optional: `logo-text`, `logo-url`, `favicon-url`, `app-icon-url`, `app-background-color`. |
-| `pages` | List of pages; each has `name`, `slug` (empty = `/`), `columns` with `size: small \| full` and `widgets`. |
+branding:
+  app-name: DASH-DASH-DASH
+  footer: "Your Footer Text"      # HTML or text; omit to hide
+  logo-text: ""                    # Optional
+  logo-url: ""                     # Optional
+  favicon-url: /assets/favicon.ico # Optional
+  app-icon-url: ""                 # Optional
+  app-background-color: ""         # Optional
 
-### Pages and columns
+pages:
+  - name: Home
+    slug: ""                       # Empty = root URL (/)
+    # ... see Pages section below
+```
 
-- **Page:** `name`, `slug`, `hide-desktop-navigation`, `center-vertically`, `width` (default | wide | slim), optional `head-widgets`.
-- **Column:** `size: small` or `full`; each has a `widgets` list.
+#### Pages & Columns
 
-##
+```yaml
+pages:
+  - name: Home
+    slug: ""                            # URL path (empty = /)
+    hide-desktop-navigation: true        # Hide top nav
+    center-vertically: true
+    width: default                       # default | wide | slim
+    desktop-navigation-width: wide       # wide | slim
+    show-mobile-header: true
+    
+    columns:
+      - size: small                      # small | full
+        widgets:
+          - type: clock                  # See Widgets section
+          # ... more widgets
+      
+      - size: full
+        widgets:
+          - type: search
+          # ... more widgets
+```
+
+#### Variable Substitution
+
+Use environment variables or secrets in config:
+
+```yaml
+# Environment variable
+password: ${MY_PASSWORD}
+
+# Docker secret (file at /run/secrets/db_password)
+password: ${secret:db_password}
+
+# Read file path from env var
+certificate: ${readFileFromEnv:CERT_PATH}
+
+# Escape literal $
+literal: \${not-a-variable}
+```
+
+#### Config Includes
+
+Split config into multiple files:
+
+```yaml
+# Main config.yml
+pages:
+  - $include: pages/home.yml
+  - $include: pages/feeds.yml
+```
+
+Paths are relative to the file containing `$include`. Recursion limit: 20 levels.
+
+### Hot Reload
+
+Config changes apply automatically—just refresh the page. No restart needed.
+
+**Note:** `.env` changes require restart.
+
+---
 
 ## Widgets
 
-Defined under `pages[].columns[].widgets`. Every widget has `type` plus type-specific options. Common to all: `title`, `hide-header`, `css-class`; for data widgets, `cache` (e.g. `1m`, `5m`).
+All widgets share common properties:
+- `type` — Widget type (required)
+- `title` — Custom title
+- `hide-header` — Hide widget header
+- `css-class` — Custom CSS class
+- `cache` — Cache duration override (e.g., `5m`, `1h`)
 
 ### Clock
 
-| Option | Description |
-|--------|-------------|
-| `hour-format` | `12h` or `24h` |
-| `timezones` | List of `timezone` + `label` |
+Display time in multiple timezones with 12/24-hour format.
+
+```yaml
+- type: clock
+  hour-format: 24h              # 12h | 24h
+  timezones:                    # Optional: show additional timezones
+    - timezone: America/New_York
+      label: New York
+    - timezone: Europe/London
+      label: London
+```
+
+**Parameters:**
+- `hour-format` — `12h` or `24h` (default: `24h`)
+- `timezones` — List of `timezone` (IANA) and `label`
+
+---
 
 ### Calendar
 
-| Option | Description |
-|--------|-------------|
-| `first-day-of-week` | `monday` … `sunday` |
+Monthly calendar view with configurable start day.
+
+```yaml
+- type: calendar
+  first-day-of-week: monday     # monday | tuesday | ... | sunday
+```
+
+**Parameters:**
+- `first-day-of-week` — Starting day of the week (default: `monday`)
+
+---
 
 ### Weather
 
-Uses [Open-Meteo](https://open-meteo.com/) (no API key).
+Current weather and forecast powered by [Open-Meteo](https://open-meteo.com/) (no API key required).
 
-| Option | Description |
-|--------|-------------|
-| `location` | **Required.** e.g. `"City, Country"` |
-| `units` | `metric` or `imperial` |
-| `hour-format` | `12h` or `24h` |
-| `hide-location`, `show-area-name` | Toggle location/area in label |
+```yaml
+- type: weather
+  location: Dhaka, Bangladesh   # City, Country or City, Area, Country
+  units: metric                 # metric | imperial
+  hour-format: 12h              # 12h | 24h
+  hide-location: false          # Hide location name
+  show-area-name: false         # Show area/region in label
+```
 
-### IP address
+**Parameters:**
+- `location` — **Required.** City and country (e.g., `"London, UK"`)
+- `units` — `metric` (°C, km/h) or `imperial` (°F, mph) (default: `metric`)
+- `hour-format` — `12h` or `24h` for time display
+- `hide-location` — Don't show location name
+- `show-area-name` — Include region/area in title
 
-| Option | Description |
-|--------|-------------|
-| `public-url` | Omit = ipinfo.io; `""` = hide public IP; or custom URL |
-| `interfaces` | e.g. `[wlo1, eth0]` — only show local IP if default route is in list |
+**Cache:** Updates on the hour.
 
-### To-do
+---
 
-| Option | Description |
-|--------|-------------|
-| `id` | **Required.** localStorage key; different ids = separate lists |
+### IP Address
+
+Show public and local IP addresses with country information.
+
+```yaml
+- type: ip-address
+  public-url: https://api.ipify.org    # Custom IP service URL
+  interfaces: [wlo1, eth0]             # Filter by interface names
+```
+
+**Parameters:**
+- `public-url` — IP lookup service URL (default: ipinfo.io). Set to `""` to hide public IP
+- `interfaces` — Only show local IPs for these interfaces (optional)
+
+**Cache:** 10 minutes.
+
+---
+
+### To-Do
+
+Client-side to-do list with localStorage persistence.
+
+```yaml
+- type: to-do
+  id: main                      # localStorage key (required)
+```
+
+**Parameters:**
+- `id` — **Required.** Unique identifier for localStorage. Use different IDs for separate lists.
+
+---
 
 ### Search
 
-| Option | Description |
-|--------|-------------|
-| `search-engine` | `duckduckgo`, `google`, `bing`, `perplexity`, `kagi`, `startpage`, or URL with `{QUERY}` |
-| `placeholder`, `autofocus`, `new-tab`, `target` | Input and link behavior |
-| `bangs` | List of `shortcut`, `title`, `url` (use `{QUERY}` in url) |
+Universal search bar with custom search engines and bangs (shortcuts).
 
-### Service monitor
+```yaml
+- type: search
+  search-engine: duckduckgo     # duckduckgo | google | bing | perplexity | kagi | startpage
+  placeholder: "Search or enter URL…"
+  autofocus: true               # Auto-focus on page load
+  new-tab: false                # Open results in new tab
+  target: "_blank"              # Link target attribute
+  bangs:                        # Custom search shortcuts
+    - shortcut: "!yt"
+      title: YouTube
+      url: https://www.youtube.com/results?search_query={QUERY}
+    - shortcut: "!gh"
+      title: GitHub
+      url: https://github.com/search?q={QUERY}
+```
 
-| Option | Description |
-|--------|-------------|
-| `style` | `""` or `compact` |
-| `show-failing-only` | Only show failing sites |
-| `sites` | List of: `title`, `url`, `icon`, `same-tab`, `check-url`, `allow-insecure`, `timeout`, `error-url`, `alt-status-codes`, `basic-auth` |
+**Parameters:**
+- `search-engine` — Built-in engine name or custom URL with `{QUERY}` placeholder
+- `placeholder` — Input placeholder text
+- `autofocus` — Auto-focus input on page load
+- `new-tab` — Open search results in new tab
+- `target` — HTML target attribute
+- `bangs` — Custom shortcuts: `shortcut`, `title`, `url` (use `{QUERY}`)
 
-Icons: `si:name`, `di:name`, `mdi:name`, `sh:name`, or full URL. Default timeout 3s.
+**Built-in engines:** `duckduckgo`, `google`, `bing`, `perplexity`, `kagi`, `startpage`
+
+**Usage:** Type `!yt cats` → searches YouTube for "cats"
+
+---
+
+### Monitor
+
+**Service monitoring with smart connectivity detection.** Tracks uptime, response time, and status. Automatically detects local vs remote services and handles internet outages gracefully.
+
+```yaml
+- type: monitor
+  title: Services
+  style: compact                        # "" (default) | compact
+  show-failing-only: false              # Show only failing services
+  show-internet-status: true            # Show internet connectivity status
+  sites:
+    - title: Vaultwarden
+      url: http://localhost:80          # Service URL
+      icon: si:vaultwarden              # Icon (see below)
+      check-url: http://localhost:80/health    # Health check URL (optional)
+      timeout: 7s                        # Request timeout
+      allow-insecure: false              # Skip TLS verification
+      same-tab: false                    # Open in same tab
+      error-url: http://localhost/status # Link when service is down
+      alt-status-codes: [401, 403]       # Treat these codes as success
+      basic-auth:                        # HTTP basic authentication
+        username: admin
+        password: ${secret:monitor_pass}
+```
+
+**Parameters:**
+- `style` — Layout: `` (default) or `compact`
+- `show-failing-only` — Only display services with errors
+- `show-internet-status` — Display internet connection status at top (default: `false`)
+- `sites` — List of services to monitor
+
+**Per-Site Options:**
+- `title` — Service name (required)
+- `url` — Service URL (required)
+- `icon` — Icon identifier or URL
+- `check-url` — Override URL for health checks
+- `timeout` — Request timeout (default: `7s`)
+- `allow-insecure` — Skip TLS certificate validation
+- `same-tab` — Open link in same tab
+- `error-url` — Alternative URL when service is down
+- `alt-status-codes` — List of HTTP codes to treat as success (besides 200)
+- `basic-auth` — Username and password for authentication
+
+**Icon Formats:**
+- `si:name` — SimpleIcons (e.g., `si:docker`, `si:github`)
+- `di:name` — DevIcons
+- `mdi:name` — Material Design Icons
+- `sh:name` — Skill Icons
+- Full URL — Custom image (e.g., `/assets/logo.png`)
+
+**Features:**
+- ✅ **Smart Detection:** Automatically identifies local services (192.168.x.x, 127.0.0.1, etc.)
+- ✅ **Internet Aware:** Checks internet connectivity; shows gray "Unknown" for remote services when offline
+- ✅ **Status Codes:** Displays actual HTTP codes (200, 404, 500) instead of generic messages
+- ✅ **History Dots:** Last 10 checks shown as green/red indicators
+- ✅ **Adaptive Checking:** Checks every 5 minutes normally, every 60 seconds when internet is down
+
+**Status Display:**
+- `200` / `201` / etc. — HTTP status code (green if success, red if error)
+- `Timeout` — Request timed out
+- `Connection Error` — Network unreachable
+- `Unknown` — Remote service, internet is down (gray icon)
+
+**Cache:** 5 minutes (60 seconds during internet outage).
+
+---
 
 ### Bookmarks
 
-| Option | Description |
-|--------|-------------|
-| `groups` | List of groups: `title`, `color` (HSL), `same-tab`, `hide-arrow`, `target`, `links` |
-| (per link) | `title`, `url`, `icon`, `description`, `same-tab`, `hide-arrow`, `target` |
+Organized bookmark groups with icons and descriptions.
 
-Icon: empty = favicon; or `si:`, `di:`, `mdi:`, `sh:` + name, or URL.
+```yaml
+- type: bookmarks
+  title: Bookmarks
+  groups:
+    - title: General
+      color: "200 60 50"        # Optional HSL color
+      same-tab: false           # Group-wide link behavior
+      hide-arrow: false         # Hide arrow icon
+      target: "_blank"
+      links:
+        - title: Gmail
+          url: https://mail.google.com
+          icon: si:gmail        # Icon (see Monitor section)
+          description: Email    # Optional description
+          same-tab: false       # Per-link override
+          hide-arrow: false
+          target: "_blank"
+```
+
+**Parameters:**
+- `groups` — List of bookmark groups
+
+**Group Options:**
+- `title` — Group heading (required)
+- `color` — HSL color for group (optional)
+- `same-tab` — Open links in same tab (default for group)
+- `hide-arrow` — Hide external link arrow
+- `target` — HTML target attribute
+- `links` — List of bookmarks
+
+**Link Options:**
+- `title` — Link text (required)
+- `url` — Destination URL (required)
+- `icon` — Icon (empty = favicon from URL, or use icon format from Monitor section)
+- `description` — Optional subtitle text
+- `same-tab` — Override group setting
+- `hide-arrow` — Override group setting
+- `target` — Override group target
+
+---
 
 ### RSS
 
-| Option | Description |
-|--------|-------------|
-| `style` | `list`, `vertical-list`, `detailed-list`, `horizontal-cards`, `horizontal-cards-2` |
-| `limit`, `collapse-after` | Max items; show-more after N (`-1` = off) |
-| `preserve-order`, `single-line-titles` | Order and title display |
-| `feeds` | List of: `url`, `title`, `limit`, `hide-categories`, `hide-description`, `item-link-prefix`, `headers` |
+RSS/Atom feed reader with multiple display styles and aggregation.
 
-[Caching and refresh](#caching-and-refresh) for cache TTLs. Full example: [config.example.full.yml](quick-start/config.example.full.yml).
-
-##
-
-## Caching and refresh
-
-| Widget | Cache TTL |
-|--------|-----------|
-| Weather | On the hour |
-| Monitor | 5 min |
-| RSS | 2 h |
-| IP | 10 min |
-
-Static assets: 24 h. Page content API: no-cache; widget data is refreshed in the background after each content request and on server startup.
-
-**Health:** `GET /api/healthz` returns 200 when the app is up.
-
-##
-
-## CLI
-
-| Command / flag | Description |
-|----------------|-------------|
-| `-config <path>` | Config file (default: `config.yml`). |
-| `--version`, `-v`, `version` | Print version and exit. |
-| `config:validate` | Validate config and exit. |
-| `config:print` | Print merged config with includes. |
-| `diagnose` | Run diagnostics. |
-
-```bash
-./dash-dash-dash -config /etc/dash-dash-dash/config.yml
-./dash-dash-dash config:validate
-./dash-dash-dash config:print
+```yaml
+- type: rss
+  title: News
+  style: list                   # list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2
+  limit: 25                     # Max items to show
+  collapse-after: 5             # Show "Load more" after N items (-1 = no collapse)
+  preserve-order: false         # Keep feed order (don't sort by date)
+  single-line-titles: false     # Truncate titles to one line
+  thumbnail-height: 200         # Card thumbnail height (pixels)
+  card-height: 300              # Card height (pixels)
+  feeds:
+    - url: https://example.com/feed.xml
+      title: Custom Feed Name   # Override feed title (optional)
+      limit: 10                 # Per-feed item limit (0 = use widget limit)
+      hide-categories: false    # Don't show categories
+      hide-description: false   # Don't show description
+      item-link-prefix: ""      # Prepend to all item URLs
+      headers:                  # Custom HTTP headers
+        Authorization: "Bearer ${secret:api_token}"
 ```
 
-##
+**Parameters:**
+- `style` — Display layout (see below)
+- `limit` — Maximum total items across all feeds
+- `collapse-after` — Show "Load more" button after N items (`-1` disables)
+- `preserve-order` — Don't reorder by date (keep feed order)
+- `single-line-titles` — Truncate long titles
+- `thumbnail-height` — Thumbnail height for card styles (pixels)
+- `card-height` — Card height for card styles (pixels)
+- `feeds` — List of RSS/Atom feed configurations
+
+**Per-Feed Options:**
+- `url` — Feed URL (required)
+- `title` — Override feed name
+- `limit` — Per-feed item limit (0 = use widget limit)
+- `hide-categories` — Hide category tags
+- `hide-description` — Hide item description
+- `item-link-prefix` — Add prefix to item links (e.g., Nitter proxy)
+- `headers` — Custom HTTP headers for feed requests
+
+**Display Styles:**
+- `list` — Compact list with small thumbnails
+- `vertical-list` — Vertical list with larger images
+- `detailed-list` — Full content with descriptions
+- `horizontal-cards` — Horizontal scrolling cards (1 row)
+- `horizontal-cards-2` — Horizontal scrolling cards (2 rows)
+
+**Cache:** 2 hours.
+
+---
+
+## Advanced
+
+### Custom CSS & Assets
+
+Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
+
+**Setup:**
+
+1. Create assets directory:
+   ```bash
+   mkdir ~/dash-dash-dash/assets
+   ```
+
+2. Add custom CSS:
+   ```css
+   /* ~/dash-dash-dash/assets/user.css */
+   .widget-bookmarks { border-radius: 12px; }
+   ```
+
+3. Reference in config:
+   ```yaml
+   theme:
+     custom-css-file: /assets/user.css
+   
+   branding:
+     favicon-url: /assets/favicon.ico
+     logo-url: /assets/logo.png
+   ```
+
+4. Mount with Docker:
+   ```yaml
+   # docker-compose.yml
+   volumes:
+     - ~/dash-dash-dash/assets:/app/assets:ro
+   ```
+
+**Supported files:** CSS, images (PNG, JPG, SVG, WebP, GIF, ICO), fonts
+
+---
+
+### Environment Variables
+
+Use environment variables for sensitive data or dynamic configuration.
+
+**In config:**
+```yaml
+sites:
+  - title: API
+    url: ${API_URL}
+    basic-auth:
+      username: ${API_USER}
+      password: ${secret:api_password}  # Docker secret
+```
+
+**Docker Compose:**
+```yaml
+# docker-compose.yml
+services:
+  dash-dash-dash:
+    environment:
+      - API_URL=https://api.example.com
+      - API_USER=admin
+```
+
+Or use `.env` file:
+```bash
+# ~/dash-dash-dash/.env
+API_URL=https://api.example.com
+API_USER=admin
+```
+
+**Docker secrets:**
+```yaml
+# References /run/secrets/api_password
+password: ${secret:api_password}
+```
+
+**Read file from env path:**
+```yaml
+certificate: ${readFileFromEnv:CERT_PATH}
+```
+
+**Escape literal `$`:**
+```yaml
+literal_value: \${not-a-variable}
+```
+
+---
+
+### CLI Commands
+
+```bash
+# Specify config file
+./dash-dash-dash -config /path/to/config.yml
+
+# Validate config
+./dash-dash-dash config:validate
+
+# Print merged config (with includes resolved)
+./dash-dash-dash config:print
+
+# Run diagnostics
+./dash-dash-dash diagnose
+
+# Show version
+./dash-dash-dash version
+./dash-dash-dash --version
+./dash-dash-dash -v
+```
+
+**Docker:**
+```bash
+docker exec dash-dash-dash /app/dash-dash-dash config:validate
+```
+
+---
+
+### API Endpoints
+
+**Health check:**
+```bash
+curl http://localhost:8080/api/healthz
+# Returns 200 OK when app is healthy
+```
+
+**Widget data:**
+```
+GET /api/pages/{page-slug}/content
+```
+
+---
+
+### Caching Behavior
+
+| Widget | Cache Duration | Notes |
+|--------|----------------|-------|
+| Weather | On the hour | Updates at :00 minutes |
+| Monitor | 5 minutes | 60 seconds when internet is down |
+| RSS | 2 hours | Per feed |
+| IP Address | 10 minutes | |
+| Clock, Calendar, To-Do | No cache | Real-time or client-side |
+
+**Static assets:** 24-hour cache (CSS, JS, images)
+
+Widget data refreshes in background after page requests and on server startup.
+
+---
 
 ## Troubleshooting
 
-| Issue | What to try |
-|-------|-------------|
-| Port in use | Change `server.port` in config (e.g. 8081) and restart. With host networking, nothing else should bind that port. |
-| Config changes not visible | Edit the file mounted at `/app/config/config.yml` (containers) or passed with `-config` (binary). Save and refresh the page; hot reload picks it up. |
-| .env not applied | Restart the container; env is read at start. |
-| Config error on start | Run `./dash-dash-dash config:validate`; use `config:print` for the merged config. |
+### Common Issues
 
-##
+**Port already in use**
+```
+Error: bind: address already in use
+```
+- Change `server.port` in config.yml (e.g., `8081`)
+- Check for conflicting services: `sudo lsof -i :8080`
 
-## Credits and license
+---
 
-Based on [Glance](https://github.com/glanceapp/glance) by svenstaro. Weather: [Open-Meteo](https://open-meteo.com/). Icons: [DuckDuckGo](https://icons.duckduckgo.com/), [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
+**Config changes not appearing**
+- Ensure you're editing the correct file (mounted at `/app/config/config.yml` in containers)
+- Refresh the browser (hot reload should pick up changes)
+- Check logs for syntax errors: `docker logs dash-dash-dash`
+- Validate config: `./dash-dash-dash config:validate`
 
-**License:** AGPL-3.0. See [LICENSE](LICENSE).
+---
+
+**.env changes not applied**
+- Restart the container: `docker compose restart`
+- Environment variables are loaded at startup only
+
+---
+
+**Config syntax errors**
+```bash
+# Validate YAML syntax
+./dash-dash-dash config:validate
+
+# View merged config (includes resolved)
+./dash-dash-dash config:print
+```
+
+---
+
+**Service monitor shows all services as down**
+- Check network mode: Use `--network host` for localhost access
+- Verify URLs are accessible from container
+- Check firewall rules
+- For local services, use `host.docker.internal` instead of `localhost` (Mac/Windows)
+
+---
+
+**RSS feeds not loading**
+- Verify feed URLs in browser
+- Check if feeds require authentication (`headers` parameter)
+- Some feeds block server requests—try different feeds
+- Review logs: `docker logs dash-dash-dash`
+
+---
+
+**Custom CSS not loading**
+- Verify assets folder is mounted: `-v ~/dash-dash-dash/assets:/app/assets:ro`
+- Check file path in config: `/assets/user.css` (not `~/dash-dash-dash/assets/...`)
+- Ensure file permissions allow reading
+- Clear browser cache
+
+---
+
+**Weather widget not working**
+- Verify location format: `"City, Country"` (e.g., `"London, UK"`)
+- Check Open-Meteo service status
+- Try different city name variations
+
+---
+
+### Debug Mode
+
+View detailed logs:
+```bash
+# Docker Compose
+docker compose logs -f
+
+# Docker
+docker logs -f dash-dash-dash
+
+# Go binary
+./dash-dash-dash  # Logs to stdout
+```
+
+---
+
+### Getting Help
+
+1. Check [quick-start/config.example.full.yml](quick-start/config.example.full.yml) for examples
+2. Validate config: `./dash-dash-dash config:validate`
+3. Review logs for error messages
+4. Open an issue on GitHub with:
+   - Config snippet (redact sensitive data)
+   - Log output
+   - Steps to reproduce
+
+---
+
+## License
+
+**AGPL-3.0** — See [LICENSE](LICENSE)
+
+Based on [Glance](https://github.com/glanceapp/glance) by **glanceapp**.  
+Weather data: [Open-Meteo](https://open-meteo.com/) (no API key required).  
+Icons: [DuckDuckGo Icons](https://icons.duckduckgo.com/), [SimpleIcons](https://simpleicons.org/).  
+Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
+
+---
+
+**Built with ❤️ for homelabs and minimalists.**
 

@@ -45,6 +45,7 @@ pages:
 
           - type: monitor
             title: Services
+            show-internet-status: true
             sites:
               - title: Vaultwarden
                 url: http://localhost:80
