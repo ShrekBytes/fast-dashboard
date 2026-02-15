@@ -371,18 +371,18 @@ func (widget *rssWidget) fetchItemsFromFeedTask(ctx context.Context, request rss
 		items = append(items, rssItem)
 	}
 
-// Update cache with ETag and Last-Modified for future conditional requests
-if etag != "" || lastModified != "" {
-	widget.cachedFeedsMutex.Lock()
-	widget.cachedFeeds[request.URL] = &cachedRSSFeed{
-		etag:         etag,
-		lastModified: lastModified,
-		items:        items,
+	// Update cache with ETag and Last-Modified for future conditional requests
+	if etag != "" || lastModified != "" {
+		widget.cachedFeedsMutex.Lock()
+		widget.cachedFeeds[request.URL] = &cachedRSSFeed{
+			etag:         etag,
+			lastModified: lastModified,
+			items:        items,
+		}
+		widget.cachedFeedsMutex.Unlock()
 	}
-	widget.cachedFeedsMutex.Unlock()
-}
 
-return items, nil
+	return items, nil
 }
 
 func findThumbnailInItemExtensions(item *gofeed.Item) string {

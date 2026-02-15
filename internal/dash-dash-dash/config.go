@@ -30,7 +30,6 @@ type config struct {
 	Server struct {
 		Host       string `yaml:"host"`
 		Port       uint16 `yaml:"port"`
-		Proxied    bool   `yaml:"proxied"`
 		AssetsPath string `yaml:"assets-path"`
 		BaseURL    string `yaml:"base-url"`
 		BasePath   string `yaml:"-"` // path component of BaseURL, for relative asset/API URLs (avoids CORS when opening via 127.0.0.1 vs localhost)

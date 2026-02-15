@@ -20,7 +20,6 @@ server:
   port: 8080                           # HTTP port
   base-url: http://localhost:8080      # External URL (for links & asset references)
   # assets-path: /path/to/assets       # Serve custom files at /assets/ (CSS, icons, etc.)
-  # proxied: false                     # Set true if behind reverse proxy (affects logging)
 
 # ───────────────────────────────────────────────────────────────────────────
 # DOCUMENT & META

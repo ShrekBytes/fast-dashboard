@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"log/slog"
 	"math"
-	"net/http"
 	"sync/atomic"
 	"time"
 
@@ -96,8 +95,6 @@ type widget interface {
 	setProviders(*widgetProviders)
 	update(context.Context)
 	setID(uint64)
-	handleRequest(w http.ResponseWriter, r *http.Request)
-	setHideHeader(bool)
 }
 
 type cacheType int
@@ -118,7 +115,6 @@ type widgetBase struct {
 	CSSClass            string           `yaml:"css-class"`
 	CustomCacheDuration durationField    `yaml:"cache"`
 	ContentAvailable    bool             `yaml:"-"`
-	WIP                 bool             `yaml:"-"`
 	Error               error            `yaml:"-"`
 	Notice              error            `yaml:"-"`
 	templateBuffer      bytes.Buffer     `yaml:"-"`
@@ -144,10 +140,6 @@ func (w *widgetBase) requiresUpdate(now *time.Time) bool {
 	return now.After(w.nextUpdate)
 }
 
-func (w *widgetBase) IsWIP() bool {
-	return w.WIP
-}
-
 func (w *widgetBase) update(ctx context.Context) {}
 
 func (w *widgetBase) GetID() uint64 {
@@ -160,14 +152,6 @@ func (w *widgetBase) setID(id uint64) {
 
 func (w *widgetBase) IsRefreshable() bool {
 	return false
-}
-
-func (w *widgetBase) setHideHeader(value bool) {
-	w.HideHeader = value
-}
-
-func (w *widgetBase) handleRequest(rw http.ResponseWriter, _ *http.Request) {
-	http.Error(rw, "not implemented", http.StatusNotImplemented)
 }
 
 func (w *widgetBase) GetType() string {

@@ -390,8 +390,7 @@ func (a *application) findWidgetByID(id uint64) (widget, *page) {
 func (a *application) handleWidgetRequest(w http.ResponseWriter, r *http.Request) {
 	// Parse widget ID from URL
 	widgetIDStr := r.PathValue("widget")
-	var widgetID uint64
-	_, err := fmt.Sscanf(widgetIDStr, "%d", &widgetID)
+	widgetID, err := strconv.ParseUint(widgetIDStr, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid widget ID"))

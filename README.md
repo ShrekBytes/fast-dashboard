@@ -121,7 +121,7 @@ Replace `docker` with `podman` if using Podman.
 
 ### Go Binary
 
-**Requirements:** Go 1.21+
+**Requirements:** Go 1.24+
 
 1. Copy [config.yml](quick-start/dash-dash-dash/config/config.yml) to your working directory
 

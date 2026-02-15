@@ -35,6 +35,23 @@ var defaultInsecureHTTPClient = &http.Client{
 	},
 }
 
+// monitorHTTPClient has no global timeout — monitor requests use per-request
+// context timeouts so that user-configured timeout values (default 7s) aren't
+// silently clipped by the 5s client timeout.
+var monitorHTTPClient = &http.Client{
+	Transport: &http.Transport{
+		MaxIdleConnsPerHost: 10,
+		Proxy:               http.ProxyFromEnvironment,
+	},
+}
+
+var monitorInsecureHTTPClient = &http.Client{
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy:           http.ProxyFromEnvironment,
+	},
+}
+
 type requestDoer interface {
 	Do(*http.Request) (*http.Response, error)
 }
