@@ -4,7 +4,7 @@
 
 **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
-A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Glance is more feature-rich and definitely better, but this one is faster and minimal.
+A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Glance is more feature-rich and definitely better, but this one is just fast and minimal.
 
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png)
