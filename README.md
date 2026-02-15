@@ -1,4 +1,4 @@
-Minimal, blazing-fast dashboard for your homelab or new-tab page
+## DASH-DASH-DASH: Minimal, blazing-fast dashboard
 
 > **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
