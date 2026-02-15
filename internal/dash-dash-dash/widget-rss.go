@@ -79,8 +79,16 @@ func (widget *rssWidget) initialize() error {
 	return nil
 }
 
+// needsImages returns true if the widget style displays images
+func (widget *rssWidget) needsImages() bool {
+	// Only extract images for styles that actually display them
+	return widget.Style == "horizontal-cards" || 
+	       widget.Style == "horizontal-cards-2" || 
+	       widget.Style == "detailed-list"
+}
+
 func (widget *rssWidget) update(ctx context.Context) {
-	items, err := widget.fetchItemsFromFeeds()
+	items, err := widget.fetchItemsFromFeeds(ctx)
 
 	if !widget.canContinueUpdateAfterHandlingErr(err) {
 		return
@@ -152,10 +160,12 @@ func (f rssFeedItemList) sortByNewest() rssFeedItemList {
 	return f
 }
 
-func (widget *rssWidget) fetchItemsFromFeeds() (rssFeedItemList, error) {
+func (widget *rssWidget) fetchItemsFromFeeds(ctx context.Context) (rssFeedItemList, error) {
 	requests := widget.FeedRequests
 
-	job := newJob(widget.fetchItemsFromFeedTask, requests).withWorkers(30)
+	job := newJob(func(req rssFeedRequest) ([]rssFeedItem, error) {
+		return widget.fetchItemsFromFeedTask(ctx, req)
+	}, requests).withWorkers(30)
 	feeds, errs, err := workerPoolDo(job)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", errNoContent, err)
@@ -193,8 +203,8 @@ func (widget *rssWidget) fetchItemsFromFeeds() (rssFeedItemList, error) {
 	return entries, nil
 }
 
-func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFeedItem, error) {
-	req, err := http.NewRequest("GET", request.URL, nil)
+func (widget *rssWidget) fetchItemsFromFeedTask(ctx context.Context, request rssFeedRequest) ([]rssFeedItem, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", request.URL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -272,12 +282,18 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 				var link string
 
 				if len(item.Link) > 0 && item.Link[0] == '/' {
-					link = item.Link
+				link = item.Link
 				} else {
 					link = "/" + item.Link
 				}
 
-				rssItem.Link = parsedUrl.Scheme + "://" + parsedUrl.Host + link
+				// Use strings.Builder for efficient concatenation
+				var urlBuilder strings.Builder
+				urlBuilder.WriteString(parsedUrl.Scheme)
+				urlBuilder.WriteString("://")
+				urlBuilder.WriteString(parsedUrl.Host)
+				urlBuilder.WriteString(link)
+				rssItem.Link = urlBuilder.String()
 			}
 		}
 
@@ -317,29 +333,32 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 			rssItem.ChannelName = feed.Title
 		}
 
-		if item.Image != nil {
-			rssItem.ImageURL = item.Image.URL
-		} else if thumbURL := findThumbnailInItemExtensions(item); thumbURL != "" {
-			rssItem.ImageURL = thumbURL
-		} else if itemHTML := getItemHTML(item, feed.Link, request.URL); itemHTML != "" {
-			baseURL := feed.Link
-			if baseURL == "" {
-				baseURL = request.URL
+		// Only extract images if the widget style displays them (performance optimization)
+		if widget.needsImages() {
+			if item.Image != nil {
+				rssItem.ImageURL = item.Image.URL
+			} else if thumbURL := findThumbnailInItemExtensions(item); thumbURL != "" {
+				rssItem.ImageURL = thumbURL
+			} else if itemHTML := getItemHTML(item, feed.Link, request.URL); itemHTML != "" {
+				baseURL := feed.Link
+				if baseURL == "" {
+					baseURL = request.URL
+				}
+				if parsed, err := url.Parse(baseURL); err == nil && parsed.Host != "" {
+					baseURL = parsed.Scheme + "://" + parsed.Host
+				}
+				if imgURL := firstImageFromHTML(itemHTML, baseURL); imgURL != "" {
+					rssItem.ImageURL = imgURL
+				}
 			}
-			if parsed, err := url.Parse(baseURL); err == nil && parsed.Host != "" {
-				baseURL = parsed.Scheme + "://" + parsed.Host
-			}
-			if imgURL := firstImageFromHTML(itemHTML, baseURL); imgURL != "" {
-				rssItem.ImageURL = imgURL
-			}
-		}
-		if rssItem.ImageURL == "" && feed.Image != nil {
-			feedImageURL := feed.Image.URL
-			if len(feedImageURL) > 0 && feedImageURL[0] == '/' {
-				feedImageURL = strings.TrimRight(feed.Link, "/") + feedImageURL
-			}
-			if feedImageURL != "" && !looksLikeFavicon(feedImageURL) {
-				rssItem.ImageURL = feedImageURL
+			if rssItem.ImageURL == "" && feed.Image != nil {
+				feedImageURL := feed.Image.URL
+				if len(feedImageURL) > 0 && feedImageURL[0] == '/' {
+					feedImageURL = strings.TrimRight(feed.Link, "/") + feedImageURL
+				}
+				if feedImageURL != "" && !looksLikeFavicon(feedImageURL) {
+					rssItem.ImageURL = feedImageURL
+				}
 			}
 		}
 

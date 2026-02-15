@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"iter"
-	"log"
+	"log/slog"
 	"maps"
 	"os"
 	"path/filepath"
@@ -73,7 +73,7 @@ type page struct {
 		Widgets widgets `yaml:"widgets"`
 	} `yaml:"columns"`
 	PrimaryColumnIndex int8       `yaml:"-"`
-	mu                 sync.Mutex `yaml:"-"`
+	mu                 sync.RWMutex `yaml:"-"`
 }
 
 func newConfigFromYAML(contents []byte) (*config, error) {
@@ -302,9 +302,9 @@ func configFilesWatcher(
 		for filePath := range newWatched {
 			if _, ok := previousWatched[filePath]; !ok {
 				if err := watcher.Add(filePath); err != nil {
-					log.Printf(
-						"Could not add file to watcher, changes to this file will not trigger a reload. path: %s, error: %v",
-						filePath, err,
+					slog.Warn("Could not add file to watcher, changes to this file will not trigger a reload",
+						"path", filePath,
+						"error", err,
 					)
 				}
 			}
@@ -388,6 +388,7 @@ func configFilesWatcher(
 				if !isOpen {
 					return
 				}
+				slog.Error("Config watcher error", "error", err)
 				onErr(fmt.Errorf("watcher error: %w", err))
 			}
 		}

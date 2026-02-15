@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
+	"log/slog"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -40,7 +40,7 @@ func readAllFromStaticFS(path string) ([]byte, error) {
 var staticFSHash = func() string {
 	hash, err := computeFSHash(staticFS)
 	if err != nil {
-		log.Printf("Could not compute static assets cache key: %v", err)
+		slog.Error("Could not compute static assets cache key", "error", err)
 		return strconv.FormatInt(time.Now().Unix(), 10)
 	}
 

@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -283,8 +283,8 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 
 	// Render immediately with current (possibly stale) widget state; do not block on updates.
 	func() {
-		page.mu.Lock()
-		defer page.mu.Unlock()
+		page.mu.RLock()
+		defer page.mu.RUnlock()
 		err = pageContentTemplate.Execute(&responseBytes, pageData)
 	}()
 
@@ -302,9 +302,10 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 	go func() {
 		defer func() {
 			if x := recover(); x != nil {
-				log.Printf("background widget update panic: %v", x)
+				slog.Error("background widget update panic", "error", x)
 			}
 		}()
+		// Acquire lock inside the defer recover block to ensure proper cleanup
 		p.mu.Lock()
 		defer p.mu.Unlock()
 		p.updateOutdatedWidgets()
@@ -374,8 +375,12 @@ func (a *application) handleWidgetRequest(w http.ResponseWriter, r *http.Request
 
 	page.mu.Lock()
 	widget.update(ctx)
-	html := widget.Render()
 	page.mu.Unlock()
+
+	// Read widget HTML with read lock
+	page.mu.RLock()
+	html := widget.Render()
+	page.mu.RUnlock()
 
 	// Return the rendered widget HTML
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -404,9 +409,16 @@ func (a *application) runBackgroundRefresh(ctx context.Context) {
 
 func (a *application) refreshAllPages() {
 	for _, page := range a.slugToPage {
-		page.mu.Lock()
-		page.updateOutdatedWidgets()
-		page.mu.Unlock()
+		func(p *page) {
+			defer func() {
+				if x := recover(); x != nil {
+					slog.Error("page refresh panic", "error", x, "page", p.Title)
+				}
+			}()
+			p.mu.Lock()
+			defer p.mu.Unlock()
+			p.updateOutdatedWidgets()
+		}(page)
 	}
 }
 
@@ -471,8 +483,11 @@ func (a *application) server() (func() error, func() error) {
 	handler := gzipMiddleware(mux)
 
 	server := http.Server{
-		Addr:    fmt.Sprintf("%s:%d", a.Config.Server.Host, a.Config.Server.Port),
-		Handler: handler,
+		Addr:         fmt.Sprintf("%s:%d", a.Config.Server.Host, a.Config.Server.Port),
+		Handler:      handler,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	refreshCtx, refreshCancel := context.WithCancel(context.Background())
@@ -480,11 +495,11 @@ func (a *application) server() (func() error, func() error) {
 	go a.runBackgroundRefresh(refreshCtx)
 
 	start := func() error {
-		log.Printf("Starting server on %s:%d (base-url: \"%s\", assets-path: \"%s\")\n",
-			a.Config.Server.Host,
-			a.Config.Server.Port,
-			a.Config.Server.BaseURL,
-			absAssetsPath,
+		slog.Info("Starting server",
+			"host", a.Config.Server.Host,
+			"port", a.Config.Server.Port,
+			"base_url", a.Config.Server.BaseURL,
+			"assets_path", absAssetsPath,
 		)
 
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -496,7 +511,18 @@ func (a *application) server() (func() error, func() error) {
 
 	stop := func() error {
 		a.refreshCancel()
-		return server.Close()
+		
+		// Graceful shutdown with 10 second timeout
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer shutdownCancel()
+		
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			slog.Error("Server shutdown error", "error", err)
+			// Force close if graceful shutdown fails
+			return server.Close()
+		}
+		
+		return nil
 	}
 
 	return start, stop

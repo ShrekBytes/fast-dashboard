@@ -785,6 +785,35 @@ Error: bind: address already in use
 
 **RSS feeds not loading**
 - Verify feed URLs in browser
+- Check for valid XML/RSS format
+- Some feeds may block non-browser user agents
+- Try setting custom headers:
+  ```yaml
+  feeds:
+    - url: https://example.com/feed
+      headers:
+        User-Agent: "Mozilla/5.0"
+  ```
+- Increase cache duration if rate-limited
+
+---
+
+**Slow performance**
+- Reduce RSS feed count or increase cache duration
+- Use `style: list` instead of `horizontal-cards` for RSS (skips image extraction)
+- Check monitor widget site count and timeouts
+- Monitor system resources (CPU/memory)
+- Check logs for slow API responses
+
+---
+
+**Monitor widget shows "Unknown"**
+- Internet connectivity check failed (tests 1.1.1.1 and dns.quad9.net)
+- Local network sites still checked when internet is down
+- Verify `check-url` if using custom health endpoints
+- Enable `allow-insecure: true` for self-signed certificates
+
+---
 - Check if feeds require authentication (`headers` parameter)
 - Some feeds block server requests—try different feeds
 - Review logs: `docker logs dash-dash-dash`
