@@ -94,7 +94,7 @@ details[open] .summary::after {
 /* TODO: refactor, otherwise I hope I never have to change dynamic columns again */
 .dynamic-columns {
     --list-half-gap: 0.5rem;
-    gap: var(--widget-content-vertical-padding) var(--widget-content-horizontal-padding);
+    gap: calc(var(--list-half-gap) * 2) var(--widget-content-horizontal-padding);
     display: grid;
     grid-template-columns: repeat(var(--columns-per-row), 1fr);
 }
