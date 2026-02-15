@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -60,12 +61,15 @@ func Main() int {
 
 func serveApp(configPath string) error {
 	exitChannel := make(chan struct{})
+	exitOnce := sync.Once{} // Prevent double close panic
 	hadValidConfigOnStartup := false
 	var stopServer func() error
 
 	// Handle OS signals for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigChan) // Fix goroutine leak
+	
 	go func() {
 		sig := <-sigChan
 		slog.Info("Received signal, shutting down", "signal", sig)
@@ -74,7 +78,7 @@ func serveApp(configPath string) error {
 				slog.Error("Error stopping server", "error", err)
 			}
 		}
-		close(exitChannel)
+		exitOnce.Do(func() { close(exitChannel) })
 	}()
 
 	onChange := func(newContents []byte) {
@@ -87,7 +91,7 @@ func serveApp(configPath string) error {
 			slog.Error("Config has errors", "error", err)
 
 			if !hadValidConfigOnStartup {
-				close(exitChannel)
+				exitOnce.Do(func() { close(exitChannel) })
 			}
 
 			return
@@ -98,7 +102,7 @@ func serveApp(configPath string) error {
 			slog.Error("Failed to create application", "error", err)
 
 			if !hadValidConfigOnStartup {
-				close(exitChannel)
+				exitOnce.Do(func() { close(exitChannel) })
 			}
 
 			return

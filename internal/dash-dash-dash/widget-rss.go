@@ -28,6 +28,8 @@ var (
 
 var feedParser = gofeed.NewParser()
 
+const maxCachedFeeds = 100 // Limit RSS feed cache to prevent memory leak
+
 type rssWidget struct {
 	widgetBase       `yaml:",inline"`
 	FeedRequests     []rssFeedRequest `yaml:"feeds"`
@@ -374,6 +376,15 @@ func (widget *rssWidget) fetchItemsFromFeedTask(ctx context.Context, request rss
 	// Update cache with ETag and Last-Modified for future conditional requests
 	if etag != "" || lastModified != "" {
 		widget.cachedFeedsMutex.Lock()
+		
+		// Evict oldest entry if cache is full (simple eviction: remove first entry found)
+		if len(widget.cachedFeeds) >= maxCachedFeeds {
+			for k := range widget.cachedFeeds {
+				delete(widget.cachedFeeds, k)
+				break // Remove just one entry to make room
+			}
+		}
+		
 		widget.cachedFeeds[request.URL] = &cachedRSSFeed{
 			etag:         etag,
 			lastModified: lastModified,

@@ -16,6 +16,7 @@ import (
 )
 
 const uptimeHistoryMaxEntries = 10
+const uptimeHistoryMaxURLs = 200 // Limit total unique URLs to prevent memory leak
 
 var uptimeHistory = newUptimeHistoryStore(uptimeHistoryMaxEntries)
 
@@ -28,13 +29,20 @@ var (
 )
 
 type uptimeHistoryStore struct {
-	mu    sync.Mutex
-	max   int
-	store map[string][]int
+	mu         sync.Mutex
+	max        int
+	maxURLs    int
+	store      map[string][]int
+	accessTime map[string]time.Time // Track last access for LRU eviction
 }
 
 func newUptimeHistoryStore(maxEntries int) *uptimeHistoryStore {
-	return &uptimeHistoryStore{max: maxEntries, store: make(map[string][]int)}
+	return &uptimeHistoryStore{
+		max:        maxEntries,
+		maxURLs:    uptimeHistoryMaxURLs,
+		store:      make(map[string][]int),
+		accessTime: make(map[string]time.Time),
+	}
 }
 
 // UptimeStatus constants: 0=unknown, 1=up, 2=down
@@ -52,12 +60,34 @@ func (u *uptimeHistoryStore) record(url string, status int) {
 	
 	u.mu.Lock()
 	defer u.mu.Unlock()
+	
+	// Evict oldest URLs if we exceed the limit (LRU eviction)
+	if _, exists := u.store[url]; !exists && len(u.store) >= u.maxURLs {
+		var oldestURL string
+		var oldestTime time.Time
+		first := true
+		
+		for k, t := range u.accessTime {
+			if first || t.Before(oldestTime) {
+				oldestURL = k
+				oldestTime = t
+				first = false
+			}
+		}
+		
+		if oldestURL != "" {
+			delete(u.store, oldestURL)
+			delete(u.accessTime, oldestURL)
+		}
+	}
+	
 	list := u.store[url]
 	list = append(list, status)
 	if len(list) > u.max {
 		list = list[len(list)-u.max:]
 	}
 	u.store[url] = list
+	u.accessTime[url] = time.Now()
 }
 
 func (u *uptimeHistoryStore) get(url string) []int {
@@ -66,6 +96,12 @@ func (u *uptimeHistoryStore) get(url string) []int {
 	list := u.store[url]
 	result := make([]int, len(list))
 	copy(result, list)
+	
+	// Update access time for LRU
+	if len(list) > 0 {
+		u.accessTime[url] = time.Now()
+	}
+	
 	return result
 }
 
@@ -385,7 +421,7 @@ func checkInternetConnectivity() bool {
 		}
 		
 		resp, err := defaultHTTPClient.Do(req)
-		cancel()
+		cancel() // Always cancel context to free resources
 		
 		if err == nil {
 			resp.Body.Close()

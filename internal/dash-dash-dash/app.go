@@ -336,6 +336,7 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 	}
 
 	// Refresh widget data in the background so the next request gets fresh data (stale-while-revalidate).
+	// Use TryLock to prevent goroutine pile-up under high load
 	p := page
 	go func() {
 		defer func() {
@@ -343,10 +344,11 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 				slog.Error("background widget update panic", "error", x)
 			}
 		}()
-		// Acquire lock inside the defer recover block to ensure proper cleanup
-		p.mu.Lock()
-		defer p.mu.Unlock()
-		p.updateOutdatedWidgets()
+		// Try to acquire lock; skip if another update is already running
+		if p.mu.TryLock() {
+			defer p.mu.Unlock()
+			p.updateOutdatedWidgets()
+		}
 	}()
 }
 
