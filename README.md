@@ -804,4 +804,3 @@ Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 ###
 
 **Built with ❤️ for minimalists.**
-
