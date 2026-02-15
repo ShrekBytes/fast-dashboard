@@ -2,7 +2,7 @@
 
 {{ define "widget-content" }}
 {{ if not (and .ShowFailingOnly (not .HasFailing)) }}
-<div class="dynamic-columns list-gap-8">
+<div class="dynamic-columns list-gap-10">
     {{ if .ShowInternetStatus }}
     <div class="flex items-center gap-12">
         {{ template "internet-status" . }}
