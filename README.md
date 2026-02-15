@@ -801,7 +801,7 @@ Weather data: [Open-Meteo](https://open-meteo.com/) (no API key required).
 Icons: [DuckDuckGo Icons](https://icons.duckduckgo.com/), [SimpleIcons](https://simpleicons.org/).  
 Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 
-##
+###
 
 **Built with ❤️ for minimalists.**
 
