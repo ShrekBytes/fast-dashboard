@@ -327,15 +327,7 @@ pages:
           - type: rss
             title: News Feed
             
-            # Layout styles:
-            # - list                  : Compact vertical list
-            # - vertical-list         : Spaced vertical list
-            # - detailed-list         : List with descriptions
-            # - horizontal-cards      : Scrollable cards (1 row)
-            # - horizontal-cards-2    : Scrollable cards (2 rows)
-            style: list
-            
-            # Options:
+            style: list                 # list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2
             limit: 25                   # Total items to show (0 = unlimited)
             collapse-after: 5           # Collapse after N items (-1 = no collapse)
             preserve-order: false       # Keep feed order (don't sort by date)

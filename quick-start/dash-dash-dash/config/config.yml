@@ -38,7 +38,7 @@ pages:
           # ───────────────────────────────────────────────────────────────────
           # Show current time in 12-hour format
           - type: clock
-            hour-format: 12h
+            hour-format: 12h            # 12h | 24h
             # Add more timezones if needed:
             # timezones:
             #   - timezone: America/New_York
@@ -47,7 +47,7 @@ pages:
           # ───────────────────────────────────────────────────────────────────
           # Monthly calendar view
           - type: calendar
-            first-day-of-week: monday
+            first-day-of-week: monday   # monday | tuesday | wednesday | thursday | friday | saturday | sunday
           
           # ───────────────────────────────────────────────────────────────────
           # Weather widget (click title to refresh)
@@ -55,7 +55,7 @@ pages:
           - type: weather
             location: London, UK
             units: metric               # metric | imperial
-            hour-format: 12h
+            hour-format: 12h            # 12h | 24h
           
           # ───────────────────────────────────────────────────────────────────
           # Show public IP and local network interfaces
@@ -80,7 +80,7 @@ pages:
           # ───────────────────────────────────────────────────────────────────
           # Search bar with URL navigation
           - type: search
-            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity
+            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity | kagi | startpage
             placeholder: "Search or enter URL…"
             autofocus: true
             # Add search shortcuts:
@@ -172,7 +172,7 @@ pages:
           # Change feed URL to your preferred source
           - type: rss
             title: Tech News
-            style: horizontal-cards
+            style: horizontal-cards     # list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2
             limit: 8
             collapse-after: -1          # -1 = no collapse
             feeds:
