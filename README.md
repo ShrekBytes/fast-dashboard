@@ -1,4 +1,4 @@
-## DASH-DASH-DASH: Minimal, blazing-fast dashboard
+## DASH-DASH-DASH (Minimal, blazing-fast dashboard)
 
 > **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
