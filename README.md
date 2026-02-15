@@ -306,8 +306,6 @@ Icon: empty = favicon; or `si:`, `di:`, `mdi:`, `sh:` + name, or URL.
 
 ## Caching and refresh
 
-**Fast load (new-tab friendly):** The dashboard is optimized for use as a browser new-tab or home page. Page content is returned immediately with the current widget state; widget data (weather, RSS, monitor, etc.) refreshes in the background so the next load or refresh gets updated data. The browser caches page content in `localStorage` for 2 minutes, so opening a new tab again within that window shows content instantly.
-
 | Widget | Cache TTL |
 |--------|-----------|
 | Weather | On the hour |
