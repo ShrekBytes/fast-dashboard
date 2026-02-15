@@ -27,9 +27,9 @@
 
 {{ define "site" }}
 <a class="size-title-dynamic color-highlight text-truncate block grow" href="{{ .URL | safeURL }}" {{ if not .SameTab }}target="_blank"{{ end }} rel="noreferrer">{{ .Title }}</a>
-{{ if and .History (ne .StatusStyle "unknown") }}
+{{ if .History }}
 <div class="monitor-uptime-dots monitor-uptime-dots-compact" aria-hidden="true">
-    {{ range .History }}<span class="monitor-uptime-dot{{ if . }} monitor-uptime-dot-ok{{ else }} monitor-uptime-dot-fail{{ end }}"></span>{{ end }}
+    {{ range .History }}<span class="monitor-uptime-dot{{ if eq . 1 }} monitor-uptime-dot-ok{{ else if eq . 2 }} monitor-uptime-dot-fail{{ else }} monitor-uptime-dot-unknown{{ end }}"></span>{{ end }}
 </div>
 {{ end }}
 {{ if and (not .Status.TimedOut) (ne .StatusStyle "unknown") }}<div>{{ .Status.ResponseTime.Milliseconds | formatNumber }}ms</div>{{ end }}
@@ -41,7 +41,7 @@
 </div>
 {{ else if eq .StatusStyle "unknown" }}
 <div class="monitor-site-status-icon-compact" title="{{ .StatusText }}">
-    <svg fill="var(--color-subdue)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+    <svg fill="var(--color-text-base)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
     </svg>
 </div>

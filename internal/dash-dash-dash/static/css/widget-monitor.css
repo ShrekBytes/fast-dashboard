@@ -73,3 +73,8 @@
 .monitor-uptime-dot-fail {
     background-color: var(--color-negative);
 }
+
+.monitor-uptime-dot-unknown {
+    background-color: var(--color-text-base);
+    opacity: 1;
+}

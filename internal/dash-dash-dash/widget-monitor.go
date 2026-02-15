@@ -30,29 +30,41 @@ var (
 type uptimeHistoryStore struct {
 	mu    sync.Mutex
 	max   int
-	store map[string][]bool
+	store map[string][]int
 }
 
 func newUptimeHistoryStore(maxEntries int) *uptimeHistoryStore {
-	return &uptimeHistoryStore{max: maxEntries, store: make(map[string][]bool)}
+	return &uptimeHistoryStore{max: maxEntries, store: make(map[string][]int)}
 }
 
-func (u *uptimeHistoryStore) record(url string, isUp bool) {
+// UptimeStatus constants: 0=unknown, 1=up, 2=down
+const (
+	UptimeUnknown = 0
+	UptimeUp      = 1
+	UptimeDown    = 2
+)
+
+func (u *uptimeHistoryStore) record(url string, status int) {
+	// Validate status value
+	if status < UptimeUnknown || status > UptimeDown {
+		status = UptimeUnknown
+	}
+	
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	list := u.store[url]
-	list = append(list, isUp)
+	list = append(list, status)
 	if len(list) > u.max {
 		list = list[len(list)-u.max:]
 	}
 	u.store[url] = list
 }
 
-func (u *uptimeHistoryStore) get(url string) []bool {
+func (u *uptimeHistoryStore) get(url string) []int {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	list := u.store[url]
-	result := make([]bool, len(list))
+	result := make([]int, len(list))
 	copy(result, list)
 	return result
 }
@@ -75,7 +87,7 @@ type monitorWidget struct {
 		StatusText         string          `yaml:"-"`
 		StatusStyle        string          `yaml:"-"`
 		AltStatusCodes     []int           `yaml:"alt-status-codes"`
-		History            []bool          `yaml:"-"` // last N up/down results for uptime dots
+		History            []int           `yaml:"-"` // last N uptime status: 0=unknown, 1=up, 2=down
 		IsLocal            bool            `yaml:"-"` // true if site is on local network
 	} `yaml:"sites"`
 	Style               string `yaml:"style"`
@@ -164,7 +176,11 @@ func (widget *monitorWidget) update(ctx context.Context) {
 			site.Status = status
 
 			isUp := (status.Code == 200 || slices.Contains(site.AltStatusCodes, status.Code)) && status.Error == nil
-			uptimeHistory.record(site.DefaultURL, isUp)
+			uptimeStatus := UptimeDown
+			if isUp {
+				uptimeStatus = UptimeUp
+			}
+			uptimeHistory.record(site.DefaultURL, uptimeStatus)
 			site.History = uptimeHistory.get(site.DefaultURL)
 
 			if status.Error != nil && site.ErrorURL != "" {
@@ -181,14 +197,16 @@ func (widget *monitorWidget) update(ctx context.Context) {
 	for i := range widget.Sites {
 		site := &widget.Sites[i]
 		if !internetUp && !site.IsLocal {
-			// Don't update status or history - freeze last known state
+			// Record unknown state in history
+			uptimeHistory.record(site.DefaultURL, UptimeUnknown)
+			site.History = uptimeHistory.get(site.DefaultURL)
+			
 			if site.Status == nil {
 				site.Status = &siteStatus{}
 			}
 			site.StatusText = "Unknown"
 			site.StatusStyle = "unknown"
 			site.URL = site.DefaultURL
-			site.History = uptimeHistory.get(site.DefaultURL) // Keep last known history
 		}
 	}
 

@@ -44,9 +44,9 @@
             <li class="color-negative" title="{{ .Status.Error }}">{{ .StatusText }}</li>
             {{ end }}
         </ul>
-        {{ if and .History (ne .StatusStyle "unknown") }}
+        {{ if .History }}
         <div class="monitor-uptime-dots" title="Last {{ len .History }} checks" aria-hidden="true">
-            {{ range .History }}<span class="monitor-uptime-dot{{ if . }} monitor-uptime-dot-ok{{ else }} monitor-uptime-dot-fail{{ end }}"></span>{{ end }}
+            {{ range .History }}<span class="monitor-uptime-dot{{ if eq . 1 }} monitor-uptime-dot-ok{{ else if eq . 2 }} monitor-uptime-dot-fail{{ else }} monitor-uptime-dot-unknown{{ end }}"></span>{{ end }}
         </div>
         {{ end }}
     </div>
@@ -59,7 +59,7 @@
 </div>
 {{ else if eq .StatusStyle "unknown" }}
 <div class="monitor-site-status-icon">
-    <svg fill="var(--color-subdue)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+    <svg fill="var(--color-text-base)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
     </svg>
 </div>
@@ -73,7 +73,7 @@
 {{ end }}
 
 {{ define "internet-status" }}
-<svg class="monitor-site-icon" style="width: 2rem; height: 2rem;" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+<svg class="monitor-site-icon" style="width: 2rem; height: 2rem;" fill="{{ if .InternetAvailable }}var(--color-positive){{ else }}var(--color-negative){{ end }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
     <path d="M1 8.25a1.25 1.25 0 1 1 2.5 0v7.5a1.25 1.25 0 1 1-2.5 0v-7.5ZM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0 1 14 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 0 1-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 0 1-1.341-.317l-2.734-1.366A3 3 0 0 0 6.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 0 1 2.166-1.73c.432-.143.853-.386 1.011-.814.16-.432.248-.9.248-1.388Z" />
 </svg>
 <div class="grow min-width-0">

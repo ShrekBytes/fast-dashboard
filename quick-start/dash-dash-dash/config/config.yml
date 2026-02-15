@@ -101,12 +101,12 @@ pages:
                 icon: si:router
               
               - title: Pi-hole
-                url: http://192.168.1.2
+                url: http://127.0.0.1:3923
                 icon: si:pihole
               
               - title: Portainer
-                url: http://localhost:9000
-                icon: si:docker
+                url: https://google.com
+                icon: si:google
               
               # Example with custom health check:
               # - title: My App
