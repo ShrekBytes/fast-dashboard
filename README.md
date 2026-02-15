@@ -4,17 +4,18 @@
 
 **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
-A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Perfect for browser new-tab pages, homelab dashboards, or quick-access portals.
+A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Glance is more feature-rich and definitely better, but this one is faster and minimal.
+
 
 ![DASH-DASH-DASH Preview](quick-start/screenshots/preview.png)
 
----
+###
 
 ## Quick Links
 
 **[Configuration Examples](quick-start/config.example.full.yml)** • **[Widget Reference](#widgets)** • **[Installation](#installation)**
 
----
+###
 
 ## Table of Contents
 
@@ -44,8 +45,8 @@ A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/gl
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
----
 
+###
 
 ## Installation
 
@@ -75,7 +76,7 @@ Default URL: **http://localhost:8080** (configurable in `config.yml`)
 - **Update:** `docker compose pull && docker compose up -d`
 - **Logs:** `docker compose logs -f`
 
----
+##
 
 ### Docker/Podman
 
@@ -97,7 +98,7 @@ Default URL: **http://localhost:8080** (configurable in `config.yml`)
 
 Replace `docker` with `podman` if using Podman.
 
----
+##
 
 ### Podman Quadlet
 
@@ -117,7 +118,7 @@ Replace `docker` with `podman` if using Podman.
    systemctl --user enable --now dash-dash-dash.service
    ```
 
----
+##
 
 ### Go Binary
 
@@ -136,7 +137,7 @@ Replace `docker` with `podman` if using Podman.
    ./dash-dash-dash -config /path/to/config.yml
    ```
 
----
+###
 
 ## Configuration
 
@@ -265,7 +266,7 @@ Config changes apply automatically—just refresh the page. No restart needed.
 
 **Note:** `.env` changes require restart.
 
----
+###
 
 ## Widgets
 
@@ -276,6 +277,8 @@ All widgets share common properties:
 - `hide-header` — Hide widget header
 - `css-class` — Custom CSS class
 - `cache` — Cache duration override (e.g., `5m`, `1h`)
+
+##
 
 ### Clock
 
@@ -295,7 +298,7 @@ Display time in multiple timezones with 12/24-hour format.
 - `hour-format` — `12h` or `24h` (default: `24h`)
 - `timezones` — List of `timezone` (IANA) and `label`
 
----
+##
 
 ### Calendar
 
@@ -309,7 +312,7 @@ Monthly calendar view with configurable start day.
 **Parameters:**
 - `first-day-of-week` — Starting day of the week (default: `monday`)
 
----
+##
 
 ### Weather
 
@@ -333,7 +336,7 @@ Current weather and forecast powered by [Open-Meteo](https://open-meteo.com/) (n
 
 **Cache:** Updates on the hour.
 
----
+##
 
 ### IP Address
 
@@ -351,7 +354,7 @@ Show public and local IP addresses with country information.
 
 **Cache:** 10 minutes.
 
----
+##
 
 ### To-Do
 
@@ -365,7 +368,7 @@ Client-side to-do list with localStorage persistence.
 **Parameters:**
 - `id` — Unique identifier for localStorage (default: `default`). Use different IDs for separate lists.
 
----
+##
 
 ### Search
 
@@ -399,7 +402,7 @@ Universal search bar with custom search engines and bangs (shortcuts).
 
 **Usage:** Type `!yt cats` → searches YouTube for "cats"
 
----
+##
 
 ### Monitor
 
@@ -459,7 +462,7 @@ Universal search bar with custom search engines and bangs (shortcuts).
 
 **Cache:** 5 minutes (60 seconds during internet outage).
 
----
+##
 
 ### Bookmarks
 
@@ -504,7 +507,7 @@ Organized bookmark groups with icons and descriptions.
 - `hide-arrow` — Override group setting
 - `target` — Override group target
 
----
+##
 
 ### RSS
 
@@ -518,8 +521,8 @@ RSS/Atom feed reader with multiple display styles and aggregation.
   collapse-after: 5             # Show "Load more" after N items (-1 = no collapse)
   preserve-order: false         # Keep feed order (don't sort by date)
   single-line-titles: false     # Truncate titles to one line
-  thumbnail-height: 200         # Card thumbnail height (pixels)
-  card-height: 300              # Card height (pixels)
+  thumbnail-height: 200         # Card thumbnail height (only horizontal-cards-2 style)
+  card-height: 300              # Card height (only horizontal-cards style)
   feeds:
     - url: https://example.com/feed.xml
       title: Custom Feed Name   # Override feed title (optional)
@@ -537,8 +540,8 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 - `collapse-after` — Show "Load more" button after N items (`-1` disables)
 - `preserve-order` — Don't reorder by date (keep feed order)
 - `single-line-titles` — Truncate long titles
-- `thumbnail-height` — Thumbnail height for card styles (pixels)
-- `card-height` — Card height for card styles (pixels)
+- `thumbnail-height` — Thumbnail height for card styles (only horizontal-cards-2 style)
+- `card-height` — Card height for card styles (only horizontal-cards style)
 - `feeds` — List of RSS/Atom feed configurations
 
 **Per-Feed Options:**
@@ -547,15 +550,14 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 - `limit` — Per-feed item limit (0 = use widget limit)
 - `hide-categories` — Hide category tags
 - `hide-description` — Hide item description
-- `item-link-prefix` — Add prefix to item links (e.g., Nitter proxy)
 - `headers` — Custom HTTP headers for feed requests
 
 **Display Styles:**
-- `list` — Compact list with small thumbnails
+- `list` — Compact list without thumbnails
 - `vertical-list` — Alias for `list`
-- `detailed-list` — Full content with descriptions
-- `horizontal-cards` — Horizontal scrolling cards (1 row)
-- `horizontal-cards-2` — Horizontal scrolling cards (2 rows)
+- `detailed-list` — Full content with descriptions and thumbnails
+- `horizontal-cards` — Horizontal scrolling cards
+- `horizontal-cards-2` — Horizontal scrolling cards(thumbnail filled cards)
 
 **Cache:** 2 hours.
 
@@ -756,6 +758,8 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 - Verify location format: `"City, Country"` (e.g., `"London, UK"`)
 - Check Open-Meteo service status
 - Try different city name variations
+
+##
 
 ### Debug Mode
 
