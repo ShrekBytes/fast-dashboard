@@ -794,7 +794,7 @@ docker logs -f dash-dash-dash
 
 **GNU GPL-3.0** [LICENSE](LICENSE)
 
-##
+###
 
 Based on [Glance](https://github.com/glanceapp/glance) by **glanceapp**.  
 Weather data: [Open-Meteo](https://open-meteo.com/) (no API key required).  
