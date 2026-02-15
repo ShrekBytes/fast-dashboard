@@ -560,7 +560,7 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 **Cache:** 2 hours.
 
 
-##
+###
 
 
 ## Advanced
@@ -577,7 +577,7 @@ Widgets that fetch external data (Weather, RSS, Monitor, IP Address) support cli
 
 Refreshable widget titles show hover effects (pointer cursor and color change) to indicate.
 
-###
+##
 
 ### Custom CSS & Assets
 
@@ -609,7 +609,7 @@ Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
 
 **Supported files:** CSS, images (PNG, JPG, SVG, WebP, GIF, ICO), fonts
 
-###
+##
 
 ### Environment Variables
 
@@ -647,7 +647,7 @@ API_USER=admin
 certificate: ${readFileFromEnv:CERT_PATH}
 ```
 
-###
+##
 
 ### API Endpoints
 
@@ -668,7 +668,7 @@ GET /api/widgets/{widget-id}/
 ```
 Returns updated HTML for a specific widget. Used by the client-side manual refresh feature.
 
-###
+##
 
 ### Caching Behavior
 
@@ -683,7 +683,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 **Static assets:** 24-hour cache (CSS, JS, images)
 
 
-##
+###
 
 
 ## Troubleshooting
@@ -696,13 +696,13 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 - Check logs for syntax errors: `docker logs dash-dash-dash`
 - Validate config: `./dash-dash-dash config:validate`
 
-###
+##
 
 **.env changes not applied**
 - Restart the container: `docker compose restart`
 - Environment variables are loaded at startup only
 
-###
+##
 
 **Config syntax errors**
 ```bash
@@ -713,7 +713,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 ./dash-dash-dash config:print
 ```
 
-###
+##
 
 **Service monitor shows all services as down**
 - Check network mode: Use `--network host` for localhost access
@@ -721,7 +721,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 - Check firewall rules
 - For local services, use `host.docker.internal` instead of `localhost` (Mac/Windows)
 
-###
+##
 
 **RSS feeds not loading**
 - Verify feed URLs in browser
@@ -735,7 +735,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
         User-Agent: "Mozilla/5.0"
   ```
 
-###
+##
 
 **Slow performance**
 - Reduce RSS feed count
@@ -743,14 +743,14 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 - Check monitor widget site count and timeouts
 - Check logs for slow API responses
 
-###
+##
 
 **Custom CSS not loading**
 - Verify assets folder is mounted: `-v ~/dash-dash-dash/assets:/app/assets:ro`
 - Check file path in config: `/assets/user.css` (not `~/dash-dash-dash/assets/...`)
 - Ensure file permissions allow reading
 
-###
+##
 
 **Weather widget not working**
 - Verify location format: `"City, Country"` (e.g., `"London, UK"`)
@@ -771,6 +771,7 @@ docker logs -f dash-dash-dash
 ./dash-dash-dash  # Logs to stdout
 ```
 
+##
 
 ### Getting Help
 
@@ -779,7 +780,7 @@ docker logs -f dash-dash-dash
 3. Review logs for error messages
 4. Open an issue on GitHub
 
-##
+###
 
 ## License
 
