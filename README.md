@@ -10,16 +10,6 @@ A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/gl
 
 ---
 
-## ⚡ Performance Features
-
-- **Gzip Compression** — Automatic response compression (60-80% bandwidth reduction)
-- **Smart Caching** — ETag support for RSS feeds, location caching for weather
-- **Widget Preloading** — Resource hints for faster page loads
-- **Manual Refresh** — Click widget titles to refresh individual widgets (no page reload)
-- **Intelligent Monitoring** — Internet connectivity detection with local network handling
-
----
-
 ## Quick Links
 
 **[Configuration Examples](quick-start/config.example.full.yml)** • **[Widget Reference](#widgets)** • **[Installation](#installation)**
@@ -459,13 +449,6 @@ Universal search bar with custom search engines and bangs (shortcuts).
 - `mdi:name` — Material Design Icons
 - `sh:name` — Skill Icons
 - Full URL — Custom image (e.g., `/assets/logo.png`)
-
-**Features:**
-- ✅ **Smart Detection:** Automatically identifies local services (192.168.x.x, 127.0.0.1, etc.)
-- ✅ **Internet Aware:** Checks internet connectivity; shows gray "Unknown" for remote services when offline
-- ✅ **Status Codes:** Displays actual HTTP codes (200, 404, 500) instead of generic messages
-- ✅ **History Dots:** Last 10 checks shown as green/red indicators
-- ✅ **Adaptive Checking:** Checks every 5 minutes normally, every 60 seconds when internet is down
 
 **Status Display:**
 - `200` / `201` / etc. — HTTP status code (green if success, red if error)
