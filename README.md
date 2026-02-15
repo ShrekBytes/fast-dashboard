@@ -125,11 +125,35 @@ Replace `docker` with `podman` if using Podman.
 
 ### Go Binary
 
-**Requirements:** Go 1.24+
+**Option 1: Pre-built Binary (Recommended)**
+
+Download the latest `dash-dash-dash` binary from [Releases](https://github.com/shrekbytes/dash-dash-dash/releases).
 
 1. Copy [config.yml](quick-start/dash-dash-dash/config/config.yml) to your working directory
 
-2. Build and run:
+2. Run directly:
+   ```bash
+   ./dash-dash-dash
+   ```
+
+   Or specify config path:
+   ```bash
+   ./dash-dash-dash -config /path/to/config.yml
+   ```
+
+**Option 2: Build from Source**
+
+**Requirements:** Go 1.24+
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/shrekbytes/dash-dash-dash.git
+   cd dash-dash-dash
+   ```
+
+2. Copy [config.yml](quick-start/dash-dash-dash/config/config.yml) to your working directory
+
+3. Build and run:
    ```bash
    go build -o dash-dash-dash .
    ./dash-dash-dash
