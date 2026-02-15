@@ -243,11 +243,10 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 	var err error
 	var responseBytes bytes.Buffer
 
+	// Render immediately with current (possibly stale) widget state; do not block on updates.
 	func() {
 		page.mu.Lock()
 		defer page.mu.Unlock()
-
-		page.updateOutdatedWidgets()
 		err = pageContentTemplate.Execute(&responseBytes, pageData)
 	}()
 
@@ -259,6 +258,19 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 
 	w.Header().Set("Cache-Control", "private, no-store")
 	w.Write(responseBytes.Bytes())
+
+	// Refresh widget data in the background so the next request gets fresh data (stale-while-revalidate).
+	p := page
+	go func() {
+		defer func() {
+			if x := recover(); x != nil {
+				log.Printf("background widget update panic: %v", x)
+			}
+		}()
+		p.mu.Lock()
+		defer p.mu.Unlock()
+		p.updateOutdatedWidgets()
+	}()
 }
 
 func (a *application) handleFaviconRedirect(w http.ResponseWriter, r *http.Request) {
@@ -285,19 +297,11 @@ func (a *application) handleWidgetRequest(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-const (
-	backgroundRefreshInterval = 5 * time.Minute
-	backgroundRefreshInitial = 2 * time.Second
-)
+const backgroundRefreshInterval = 5 * time.Minute
 
 func (a *application) runBackgroundRefresh(ctx context.Context) {
-	// Initial warm-up so the first page load has fresh data
-	select {
-	case <-ctx.Done():
-		return
-	case <-time.After(backgroundRefreshInitial):
-		a.refreshAllPages()
-	}
+	// Run first refresh immediately so the first page load often has warm caches.
+	go a.refreshAllPages()
 
 	ticker := time.NewTicker(backgroundRefreshInterval)
 	defer ticker.Stop()

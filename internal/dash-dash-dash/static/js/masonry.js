@@ -1,4 +1,3 @@
-
 import { clamp } from "./utils.js";
 
 export function setupMasonries() {

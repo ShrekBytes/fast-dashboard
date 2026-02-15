@@ -1,10 +1,32 @@
 import { setupPopovers } from './popover.js';
 import { setupMasonries } from './masonry.js';
 import { throttledDebounce, isElementVisible, openURLInNewTab } from './utils.js';
-import { elem, find, findAll } from './templating.js';
 
 const PAGE_CONTENT_FETCH_TIMEOUT_MS = 30000;
 const PAGE_CONTENT_RETRY_DELAY_MS = 1500;
+const PAGE_CONTENT_CACHE_KEY_PREFIX = 'dash-content-';
+const PAGE_CONTENT_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
+function getCachedContent(slug) {
+    try {
+        const key = PAGE_CONTENT_CACHE_KEY_PREFIX + (slug || '');
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const { html, fetchedAt } = JSON.parse(raw);
+        if (typeof html !== 'string' || typeof fetchedAt !== 'number') return null;
+        if (Date.now() - fetchedAt > PAGE_CONTENT_CACHE_TTL_MS) return null;
+        return html;
+    } catch (_) {
+        return null;
+    }
+}
+
+function setCachedContent(slug, html) {
+    try {
+        const key = PAGE_CONTENT_CACHE_KEY_PREFIX + (slug || '');
+        localStorage.setItem(key, JSON.stringify({ html, fetchedAt: Date.now() }));
+    } catch (_) {}
+}
 
 async function fetchPageContent(pageData, retryCount = 0) {
     const base = pageData.basePath || '';
@@ -16,22 +38,22 @@ async function fetchPageContent(pageData, retryCount = 0) {
         clearTimeout(timeoutId);
         const content = await response.text();
         if (!response.ok) {
-            return `<div class="widget-content padding-inline-widget" style="color: var(--color-negative);">Failed to load (${response.status}). <a href="javascript:location.reload()">Reload</a>.</div>`;
+            return { html: `<div class="widget-content padding-inline-widget" style="color: var(--color-negative);">Failed to load (${response.status}). <a href="javascript:location.reload()">Reload</a>.</div>`, ok: false };
         }
-        return content;
+        return { html: content, ok: true };
     } catch (err) {
         clearTimeout(timeoutId);
         const isAbort = err.name === 'AbortError' || (err.message && /failed to fetch|load failed|aborted|cancelled/i.test(err.message));
         const message = isAbort ? 'Request was cancelled.' : (err.message || 'Network error.');
         const errorHtml = `<div class="widget-content padding-inline-widget" style="color: var(--color-negative);">${message} <a href="javascript:location.reload()">Reload</a>.</div>`;
         if (isAbort) {
-            return errorHtml;
+            return { html: errorHtml, ok: false };
         }
         if (retryCount < 1) {
             await new Promise(r => setTimeout(r, PAGE_CONTENT_RETRY_DELAY_MS));
             return fetchPageContent(pageData, retryCount + 1);
         }
-        return errorHtml;
+        return { html: errorHtml, ok: false };
     }
 }
 
@@ -719,16 +741,13 @@ function setupTruncatedElementTitles() {
     }
 }
 
-async function setupPage() {
-    const pageElement = document.getElementById("page");
-    const pageContentElement = document.getElementById("page-content");
-    const pageContent = await fetchPageContent(pageData);
-
-    pageContentElement.innerHTML = pageContent;
+async function applyContentAndSetup(pageElement, pageContentElement, html) {
+    pageContentElement.innerHTML = html;
+    contentReadyCallbacks.length = 0; // Only run callbacks registered during this apply (avoids stale refs when re-applying after background refetch).
 
     try {
         setupPopovers();
-        setupClocks()
+        setupClocks();
         await setupCalendars();
         await setupTodos();
         setupCarousels();
@@ -755,6 +774,29 @@ async function setupPage() {
             document.body.classList.add("page-columns-transitioned");
         }, 300);
     }
+}
+
+async function setupPage() {
+    const pageElement = document.getElementById("page");
+    const pageContentElement = document.getElementById("page-content");
+
+    const cached = getCachedContent(pageData.slug);
+    if (cached !== null) {
+        await applyContentAndSetup(pageElement, pageContentElement, cached);
+        // Re-fetch in background and replace when ready (stale-while-revalidate).
+        const result = await fetchPageContent(pageData);
+        if (result.ok && result.html !== cached) {
+            setCachedContent(pageData.slug, result.html);
+            await applyContentAndSetup(pageElement, pageContentElement, result.html);
+        }
+        return;
+    }
+
+    const result = await fetchPageContent(pageData);
+    if (result.ok) {
+        setCachedContent(pageData.slug, result.html);
+    }
+    await applyContentAndSetup(pageElement, pageContentElement, result.html);
 }
 
 setupPage();

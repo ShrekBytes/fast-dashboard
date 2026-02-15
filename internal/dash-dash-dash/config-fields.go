@@ -1,11 +1,8 @@
 package dashdashdash
 
 import (
-	"crypto/tls"
 	"fmt"
 	"html/template"
-	"net/http"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -185,105 +182,4 @@ func (i *customIconField) UnmarshalYAML(node *yaml.Node) error {
 
 	*i = newCustomIconField(value)
 	return nil
-}
-
-type proxyOptionsField struct {
-	URL           string        `yaml:"url"`
-	AllowInsecure bool          `yaml:"allow-insecure"`
-	Timeout       durationField `yaml:"timeout"`
-	client        *http.Client  `yaml:"-"`
-}
-
-func (p *proxyOptionsField) UnmarshalYAML(node *yaml.Node) error {
-	type proxyOptionsFieldAlias proxyOptionsField
-	alias := (*proxyOptionsFieldAlias)(p)
-	var proxyURL string
-
-	if err := node.Decode(&proxyURL); err != nil {
-		if err := node.Decode(alias); err != nil {
-			return err
-		}
-	}
-
-	if proxyURL == "" && p.URL == "" {
-		return nil
-	}
-
-	if p.URL != "" {
-		proxyURL = p.URL
-	}
-
-	parsedUrl, err := url.Parse(proxyURL)
-	if err != nil {
-		return fmt.Errorf("parsing proxy URL: %v", err)
-	}
-
-	var timeout = defaultClientTimeout
-	if p.Timeout > 0 {
-		timeout = time.Duration(p.Timeout)
-	}
-
-	p.client = &http.Client{
-		Timeout: timeout,
-		Transport: &http.Transport{
-			Proxy:           http.ProxyURL(parsedUrl),
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: p.AllowInsecure},
-		},
-	}
-
-	return nil
-}
-
-type queryParametersField map[string][]string
-
-func (q *queryParametersField) UnmarshalYAML(node *yaml.Node) error {
-	var decoded map[string]any
-
-	if err := node.Decode(&decoded); err != nil {
-		return err
-	}
-
-	*q = make(queryParametersField)
-
-	for key, value := range decoded {
-		switch v := value.(type) {
-		case string:
-			(*q)[key] = []string{v}
-		case int, int8, int16, int32, int64, float32, float64:
-			(*q)[key] = []string{fmt.Sprintf("%v", v)}
-		case bool:
-			(*q)[key] = []string{fmt.Sprintf("%t", v)}
-		case []string:
-			(*q)[key] = append((*q)[key], v...)
-		case []any:
-			for _, item := range v {
-				switch item := item.(type) {
-				case string:
-					(*q)[key] = append((*q)[key], item)
-				case int, int8, int16, int32, int64, float32, float64:
-					(*q)[key] = append((*q)[key], fmt.Sprintf("%v", item))
-				case bool:
-					(*q)[key] = append((*q)[key], fmt.Sprintf("%t", item))
-				default:
-					return fmt.Errorf("invalid query parameter value type: %T", item)
-				}
-			}
-		default:
-			return fmt.Errorf("invalid query parameter value type: %T", value)
-		}
-	}
-
-	return nil
-}
-
-func (q *queryParametersField) toQueryString() string {
-	query := url.Values{}
-
-	for key, values := range *q {
-		for _, value := range values {
-			query.Add(key, value)
-		}
-	}
-
-	return query.Encode()
 }

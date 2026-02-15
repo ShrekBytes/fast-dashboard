@@ -9,24 +9,12 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 )
 
 var sequentialWhitespacePattern = regexp.MustCompile(`\s+`)
 var whitespaceAtBeginningOfLinePattern = regexp.MustCompile(`(?m)^\s+`)
-
-func percentChange(current, previous float64) float64 {
-	if previous == 0 {
-		if current == 0 {
-			return 0
-		}
-		return 100
-	}
-
-	return (current/previous - 1) * 100
-}
 
 func extractDomainFromUrl(u string) string {
 	if u == "" {
@@ -39,59 +27,6 @@ func extractDomainFromUrl(u string) string {
 	}
 
 	return strings.TrimPrefix(strings.ToLower(parsed.Host), "www.")
-}
-
-func svgPolylineCoordsFromYValues(width float64, height float64, values []float64) string {
-	if len(values) < 2 {
-		return ""
-	}
-
-	verticalPadding := height * 0.02
-	height -= verticalPadding * 2
-	coordinates := make([]string, len(values))
-	distanceBetweenPoints := width / float64(len(values)-1)
-	min := slices.Min(values)
-	max := slices.Max(values)
-
-	for i := range values {
-		coordinates[i] = fmt.Sprintf(
-			"%.2f,%.2f",
-			float64(i)*distanceBetweenPoints,
-			((max-values[i])/(max-min))*height+verticalPadding,
-		)
-	}
-
-	return strings.Join(coordinates, " ")
-}
-
-func maybeCopySliceWithoutZeroValues[T int | float64](values []T) []T {
-	if len(values) == 0 {
-		return values
-	}
-
-	for i := range values {
-		if values[i] != 0 {
-			continue
-		}
-
-		c := make([]T, 0, len(values)-1)
-
-		for i := range values {
-			if values[i] != 0 {
-				c = append(c, values[i])
-			}
-		}
-
-		return c
-	}
-
-	return values
-}
-
-var urlSchemePattern = regexp.MustCompile(`^[a-z]+:\/\/`)
-
-func stripURLScheme(url string) string {
-	return urlSchemePattern.ReplaceAllString(url, "")
 }
 
 func isRunningInsideDockerContainer() bool {
@@ -117,25 +52,6 @@ func limitStringLength(s string, max int) (string, bool) {
 	}
 
 	return s, false
-}
-
-func parseRFC3339Time(t string) time.Time {
-	parsed, err := time.Parse(time.RFC3339, t)
-	if err != nil {
-		return time.Now()
-	}
-
-	return parsed
-}
-
-func normalizeVersionFormat(version string) string {
-	version = strings.ToLower(strings.TrimSpace(version))
-
-	if len(version) > 0 && version[0] != 'v' {
-		return "v" + version
-	}
-
-	return version
 }
 
 func titleToSlug(s string) string {
@@ -166,18 +82,6 @@ func executeTemplateToString(t *template.Template, data any) (string, error) {
 	return b.String(), nil
 }
 
-func stringToBool(s string) bool {
-	return s == "true" || s == "yes"
-}
-
-func itemAtIndexOrDefault[T any](items []T, index int, def T) T {
-	if index >= len(items) {
-		return def
-	}
-
-	return items[index]
-}
-
 func ternary[T any](condition bool, a, b T) T {
 	if condition {
 		return a
@@ -185,8 +89,6 @@ func ternary[T any](condition bool, a, b T) T {
 
 	return b
 }
-
-func ItsUsedTrustMeBro(...any) {}
 
 func hslToHex(h, s, l float64) string {
 	s /= 100.0
