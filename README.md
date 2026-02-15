@@ -37,10 +37,15 @@ A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/gl
   - [Bookmarks](#bookmarks)
   - [RSS](#rss)
 - [Advanced](#advanced)
+  - [Widget Manual Refresh](#widget-manual-refresh)
   - [Custom CSS & Assets](#custom-css--assets)
   - [Environment Variables](#environment-variables)
-  - [CLI Commands](#cli-commands)
+  - [API Endpoints](#api-endpoints)
+  - [Caching Behavior](#caching-behavior)
 - [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+  - [Debug Mode](#debug-mode)
+  - [Getting Help](#getting-help)
 - [License](#license)
 
 
