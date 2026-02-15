@@ -21,13 +21,6 @@ export function repeat(n, fn) {
     return elems;
 }
 
-export function find(selector) {
-    return document.querySelector(selector);
-}
-
-export function findAll(selector) {
-    return document.querySelectorAll(selector);
-}
 
 
 HTMLCollection.prototype.map = function(fn) {

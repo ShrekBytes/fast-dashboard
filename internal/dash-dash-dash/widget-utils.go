@@ -27,13 +27,6 @@ var defaultHTTPClient = &http.Client{
 	Timeout: defaultClientTimeout,
 }
 
-var defaultInsecureHTTPClient = &http.Client{
-	Timeout: defaultClientTimeout,
-	Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		Proxy:           http.ProxyFromEnvironment,
-	},
-}
 
 // monitorHTTPClient has no global timeout — monitor requests use per-request
 // context timeouts so that user-configured timeout values (default 7s) aren't
@@ -91,11 +84,6 @@ func decodeJsonFromRequest[T any](client requestDoer, request *http.Request) (T,
 	return result, nil
 }
 
-func decodeJsonFromRequestTask[T any](client requestDoer) func(*http.Request) (T, error) {
-	return func(request *http.Request) (T, error) {
-		return decodeJsonFromRequest[T](client, request)
-	}
-}
 
 type workerPoolTask[I any, O any] struct {
 	index  int

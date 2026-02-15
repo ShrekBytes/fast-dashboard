@@ -33,15 +33,6 @@ func (c *hslColorField) ToHex() string {
 	return hslToHex(c.H, c.S, c.L)
 }
 
-func (c1 *hslColorField) SameAs(c2 *hslColorField) bool {
-	if c1 == nil && c2 == nil {
-		return true
-	}
-	if c1 == nil || c2 == nil {
-		return false
-	}
-	return c1.H == c2.H && c1.S == c2.S && c1.L == c2.L
-}
 
 func (c *hslColorField) UnmarshalYAML(node *yaml.Node) error {
 	var value string

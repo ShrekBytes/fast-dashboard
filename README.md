@@ -272,6 +272,7 @@ Config changes apply automatically—just refresh the page. No restart needed.
 All widgets share common properties:
 - `type` — Widget type (required)
 - `title` — Custom title
+- `title-url` — Make the title a link to this URL
 - `hide-header` — Hide widget header
 - `css-class` — Custom CSS class
 - `cache` — Cache duration override (e.g., `5m`, `1h`)
@@ -362,7 +363,7 @@ Client-side to-do list with localStorage persistence.
 ```
 
 **Parameters:**
-- `id` — **Required.** Unique identifier for localStorage. Use different IDs for separate lists.
+- `id` — Unique identifier for localStorage (default: `default`). Use different IDs for separate lists.
 
 ---
 
@@ -551,7 +552,7 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 
 **Display Styles:**
 - `list` — Compact list with small thumbnails
-- `vertical-list` — Vertical list with larger images
+- `vertical-list` — Alias for `list`
 - `detailed-list` — Full content with descriptions
 - `horizontal-cards` — Horizontal scrolling cards (1 row)
 - `horizontal-cards-2` — Horizontal scrolling cards (2 rows)
