@@ -9,13 +9,6 @@
 #
 # Copy to config.yml and remove/comment unused sections.
 #
-# Performance Features (enabled by default):
-#   ✓ Gzip compression (60-80% bandwidth reduction)
-#   ✓ ETag support for RSS feeds (conditional requests)
-#   ✓ Weather location caching
-#   ✓ Widget preloading with resource hints
-#   ✓ Click widget titles to refresh (Weather, RSS, Monitor, IP only)
-#
 # ═══════════════════════════════════════════════════════════════════════════
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -87,21 +80,6 @@ branding:
 # Escape $ with backslash: \${not_a_variable}
 # ───────────────────────────────────────────────────────────────────────────
 
-# ───────────────────────────────────────────────────────────────────────────
-# VARIABLES & INCLUDES
-# ───────────────────────────────────────────────────────────────────────────
-#
-# Environment Variables:
-#   ${ENV_VAR_NAME}              — Standard environment variable
-#   ${secret:secret_name}        — Docker/Kubernetes secret
-#   ${readFileFromEnv:FILE_PATH} — Read file path from env variable
-#
-# Include Files:
-#   - $include: path/to/file.yml — Merge external YAML (relative paths, max depth 20)
-#
-# Escape $ with backslash: \${not_a_variable}
-# ───────────────────────────────────────────────────────────────────────────
-
 # ═══════════════════════════════════════════════════════════════════════════
 # PAGES
 # ═══════════════════════════════════════════════════════════════════════════
@@ -141,8 +119,6 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # CLOCK — Display current time with multiple timezones
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: None (client-side JavaScript)
-          # Refresh: Not available (real-time updates)
           
           - type: clock
             title: Clock                # Optional, default: "Clock"
@@ -165,19 +141,15 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # CALENDAR — Monthly calendar view
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: None (client-side JavaScript)
-          # Refresh: Not available (real-time updates)
           
           - type: calendar
             title: Calendar
             first-day-of-week: monday   # monday | tuesday | ... | sunday
           
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # WEATHER — Current weather & forecast from Open-Meteo
+          # WEATHER — Current weather & forecast (click title to refresh)
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: On the hour (updates at :00 minutes)
-          # Refresh: ✓ Click title to refresh (location lookups cached)
-          # API: Open-Meteo (no API key required)
+          # Uses Open-Meteo API (no API key required)
           
           - type: weather
             location: London, UK        # "City, Country" or "City, Region, Country"
@@ -189,8 +161,7 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # IP ADDRESS — Show public IP and local network interfaces
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: 10 minutes
-          # Refresh: ✓ Click title to refresh
+          # Click title to refresh
           
           - type: ip-address
             title: IP Address
@@ -207,8 +178,6 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # TO-DO — Simple task list with localStorage
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: None (localStorage only)
-          # Refresh: Not available (client-side only)
           
           - type: to-do
             title: To-Do
@@ -224,8 +193,6 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # SEARCH — Search engine with bangs and direct URL navigation
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: None (client-side form)
-          # Refresh: Not available
           
           - type: search
             title: Search
@@ -254,11 +221,8 @@ pages:
                 url: https://stackoverflow.com/search?q={QUERY}
           
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # MONITOR — Service health monitoring with uptime tracking
+          # MONITOR — Service health monitoring (click title to refresh)
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: 5 minutes (60 seconds when internet is down)
-          # Refresh: ✓ Click title to refresh
-          # Features: Internet connectivity detection, local network handling
           
           - type: monitor
             title: Services
@@ -301,8 +265,6 @@ pages:
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           # BOOKMARKS — Organized bookmark groups with icons
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: None (static config)
-          # Refresh: Not available
           
           - type: bookmarks
             title: Bookmarks
@@ -359,11 +321,8 @@ pages:
                     icon: si:techcrunch
           
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # RSS — Aggregate RSS/Atom feeds with multiple layout styles
+          # RSS — Aggregate RSS/Atom feeds (click title to refresh)
           # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          # Cache: 2 hours per feed
-          # Refresh: ✓ Click title to refresh (with ETag support)
-          # Features: ETag/Last-Modified conditional requests, bandwidth optimization
           
           - type: rss
             title: News Feed

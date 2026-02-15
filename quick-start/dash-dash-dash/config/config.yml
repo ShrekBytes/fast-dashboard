@@ -7,11 +7,6 @@
 # 📚 Full configuration reference: quick-start/config.example.full.yml
 # 📖 Documentation: https://github.com/shrekbytes/dash-dash-dash
 #
-# Performance features enabled by default:
-#   ✓ Gzip compression (60-80% bandwidth reduction)
-#   ✓ Smart caching with ETag support
-#   ✓ Click widget titles to refresh (Weather, RSS, Monitor, IP)
-#
 # ═══════════════════════════════════════════════════════════════════════════
 
 server:
