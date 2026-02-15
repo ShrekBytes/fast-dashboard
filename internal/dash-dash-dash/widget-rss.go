@@ -479,7 +479,7 @@ func recursiveFindThumbnailInExtensions(extensions map[string][]gofeedext.Extens
 }
 
 var htmlTagsWithAttributesPattern = regexp.MustCompile(`<\/?[a-zA-Z0-9-]+ *(?:[a-zA-Z-]+=(?:"|').*?(?:"|') ?)* *\/?>`)
-var firstImgSrcPattern = regexp.MustCompile(`(?i)<img[^>]+?src=["']([^"']+)["']`)
+var firstImgSrcPattern = regexp.MustCompile(`(?i)<img[^>]*?src=["']([^"']+)["']`);
 var faviconSizeInURLPattern = regexp.MustCompile(`[?&][sw]=1[0-6](?:&|$)`)
 
 func sanitizeFeedDescription(description string) string {

@@ -102,6 +102,7 @@ type application struct {
 	slugToPage    map[string]*page
 	widgetByID    map[uint64]widget
 	refreshCancel context.CancelFunc
+	refreshWg     sync.WaitGroup
 }
 
 func newApplication(c *config) (*application, error) {
@@ -428,7 +429,11 @@ const backgroundRefreshInterval = 5 * time.Minute
 
 func (a *application) runBackgroundRefresh(ctx context.Context) {
 	// Run first refresh immediately so the first page load often has warm caches.
-	go a.refreshAllPages()
+	a.refreshWg.Add(1)
+	go func() {
+		defer a.refreshWg.Done()
+		a.refreshAllPages()
+	}()
 
 	ticker := time.NewTicker(backgroundRefreshInterval)
 	defer ticker.Stop()
@@ -438,7 +443,11 @@ func (a *application) runBackgroundRefresh(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			a.refreshAllPages()
+			a.refreshWg.Add(1)
+			go func() {
+				defer a.refreshWg.Done()
+				a.refreshAllPages()
+			}()
 		}
 	}
 }
@@ -548,6 +557,20 @@ func (a *application) server() (func() error, func() error) {
 
 	stop := func() error {
 		a.refreshCancel()
+		
+		// Wait for background refresh jobs to complete (with timeout)
+		done := make(chan struct{})
+		go func() {
+			a.refreshWg.Wait()
+			close(done)
+		}()
+		
+		select {
+		case <-done:
+			slog.Info("Background jobs completed gracefully")
+		case <-time.After(5 * time.Second):
+			slog.Warn("Background jobs did not complete within timeout, proceeding with shutdown")
+		}
 		
 		// Graceful shutdown with 10 second timeout
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)

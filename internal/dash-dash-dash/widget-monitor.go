@@ -3,12 +3,14 @@ package dashdashdash
 import (
 	"context"
 	"errors"
+	"fmt"
 	"html/template"
 	"net"
 	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -88,10 +90,31 @@ func (widget *monitorWidget) IsRefreshable() bool {
 }
 func (widget *monitorWidget) initialize() error {
 	widget.withTitle("Monitor").withCacheDuration(5 * time.Minute)
-	// Determine which sites are local
+	
+	// Validate and determine which sites are local
 	for i := range widget.Sites {
-		widget.Sites[i].IsLocal = isLocalURL(widget.Sites[i].DefaultURL)
+		site := &widget.Sites[i]
+		
+		// Validate URL format
+		if site.DefaultURL == "" {
+			return fmt.Errorf("site %d: url is required", i+1)
+		}
+		
+		// Ensure URL has a scheme
+		if !strings.HasPrefix(site.DefaultURL, "http://") && !strings.HasPrefix(site.DefaultURL, "https://") {
+			return fmt.Errorf("site %d (%s): url must start with http:// or https://", i+1, site.Title)
+		}
+		
+		// Validate check-url if provided
+		if site.CheckURL != "" {
+			if !strings.HasPrefix(site.CheckURL, "http://") && !strings.HasPrefix(site.CheckURL, "https://") {
+				return fmt.Errorf("site %d (%s): check-url must start with http:// or https://", i+1, site.Title)
+			}
+		}
+		
+		site.IsLocal = isLocalURL(site.DefaultURL)
 	}
+	
 	return nil
 }
 
@@ -313,7 +336,7 @@ func fetchStatusForSites(requests []*SiteStatusRequest) ([]siteStatus, error) {
 // Uses cached result if checked recently
 func checkInternetConnectivity() bool {
 	internetAvailableMu.RLock()
-	if time.Since(lastInternetCheck).Seconds() < float64(internetCheckCacheSecs) {
+	if time.Since(lastInternetCheck) < time.Duration(internetCheckCacheSecs)*time.Second {
 		result := internetAvailable
 		internetAvailableMu.RUnlock()
 		return result
@@ -325,7 +348,7 @@ func checkInternetConnectivity() bool {
 	defer internetAvailableMu.Unlock()
 
 	// Double-check after acquiring write lock
-	if time.Since(lastInternetCheck).Seconds() < float64(internetCheckCacheSecs) {
+	if time.Since(lastInternetCheck) < time.Duration(internetCheckCacheSecs)*time.Second {
 		return internetAvailable
 	}
 

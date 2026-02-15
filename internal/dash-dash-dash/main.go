@@ -17,7 +17,7 @@ func Main() int {
 
 	switch options.intent {
 	case cliIntentVersionPrint:
-		fmt.Println(buildVersion)
+		fmt.Printf("dash-dash-dash version %s\n", buildVersion)
 	case cliIntentServe:
 		if serveUpdateNoticeIfConfigLocationNotMigrated(options.configPath) {
 			return 1

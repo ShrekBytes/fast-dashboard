@@ -27,7 +27,7 @@ type weatherWidget struct {
 	Place          *openMeteoPlaceResponseJson `yaml:"-"`
 	Weather        *weather                    `yaml:"-"`
 	TimeLabels     [12]string                  `yaml:"-"`
-	cachedLocation *openMeteoPlaceResponseJson // Persistent cache across restarts
+	cachedLocation *openMeteoPlaceResponseJson // Cache location lookup for widget lifetime
 }
 
 var timeLabels12h = [12]string{"2am", "4am", "6am", "8am", "10am", "12pm", "2pm", "4pm", "6pm", "8pm", "10pm", "12am"}
