@@ -2,7 +2,8 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 go build -o dash-dash-dash .
+ARG VERSION=dev
+RUN CGO_ENABLED=0 go build -ldflags "-s -w -X dash-dash-dash/internal/dash-dash-dash.buildVersion=${VERSION}" -o dash-dash-dash .
 
 FROM alpine:3.21
 

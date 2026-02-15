@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func Main() int {
@@ -60,6 +62,20 @@ func serveApp(configPath string) error {
 	exitChannel := make(chan struct{})
 	hadValidConfigOnStartup := false
 	var stopServer func() error
+
+	// Handle OS signals for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		slog.Info("Received signal, shutting down", "signal", sig)
+		if stopServer != nil {
+			if err := stopServer(); err != nil {
+				slog.Error("Error stopping server", "error", err)
+			}
+		}
+		close(exitChannel)
+	}()
 
 	onChange := func(newContents []byte) {
 		if stopServer != nil {

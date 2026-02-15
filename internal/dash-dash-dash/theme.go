@@ -36,34 +36,3 @@ func (t *themeProperties) init() error {
 
 	return nil
 }
-
-func (t1 *themeProperties) SameAs(t2 *themeProperties) bool {
-	if t1 == nil && t2 == nil {
-		return true
-	}
-	if t1 == nil || t2 == nil {
-		return false
-	}
-	if t1.Light != t2.Light {
-		return false
-	}
-	if t1.ContrastMultiplier != t2.ContrastMultiplier {
-		return false
-	}
-	if t1.TextSaturationMultiplier != t2.TextSaturationMultiplier {
-		return false
-	}
-	if !t1.BackgroundColor.SameAs(t2.BackgroundColor) {
-		return false
-	}
-	if !t1.PrimaryColor.SameAs(t2.PrimaryColor) {
-		return false
-	}
-	if !t1.PositiveColor.SameAs(t2.PositiveColor) {
-		return false
-	}
-	if !t1.NegativeColor.SameAs(t2.NegativeColor) {
-		return false
-	}
-	return true
-}

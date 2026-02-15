@@ -336,8 +336,8 @@ pages:
             # card-height: 0            # Fixed card height (0 = auto)
             
             feeds:
-              - url: https://hnrss.org/frontpage
-                title: Hacker News      # Optional: Override feed title
+              - url: http://feeds.feedburner.com/ign/games-all
+                title: IGN              # Optional: Override feed title
                 limit: 10               # Per-feed limit (0 = use widget limit)
                 hide-categories: false  # Hide item categories/tags
                 hide-description: false # Hide item descriptions

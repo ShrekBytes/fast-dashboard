@@ -13,21 +13,6 @@ import (
 	"time"
 )
 
-// Helper functions for worker pool sizing
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 const uptimeHistoryMaxEntries = 10
 
 var uptimeHistory = newUptimeHistoryStore(uptimeHistoryMaxEntries)
@@ -315,7 +300,7 @@ func fetchSiteStatusTask(statusRequest *SiteStatusRequest) (siteStatus, error) {
 
 func fetchStatusForSites(requests []*SiteStatusRequest) ([]siteStatus, error) {
 	// Scale workers dynamically: 1-20 based on site count
-	workerCount := minInt(20, maxInt(1, len(requests)))
+	workerCount := min(20, max(1, len(requests)))
 	job := newJob(fetchSiteStatusTask, requests).withWorkers(workerCount)
 	results, _, err := workerPoolDo(job)
 	if err != nil {
@@ -351,7 +336,7 @@ func checkInternetConnectivity() bool {
 	}
 
 	for _, endpoint := range endpoints {
-		ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		req, err := http.NewRequestWithContext(ctx, http.MethodHead, endpoint, nil)
 		if err != nil {
 			cancel()
@@ -413,21 +398,6 @@ func isLocalURL(urlStr string) bool {
 	// Additional check for 0.0.0.0
 	if ip.String() == "0.0.0.0" || ip.String() == "::" {
 		return true
-	}
-
-	// Check specific private ranges (redundant with IsPrivate() but explicit)
-	privateRanges := []string{
-		"10.0.0.0/8",
-		"172.16.0.0/12",
-		"192.168.0.0/16",
-		"127.0.0.0/8",
-	}
-
-	for _, cidr := range privateRanges {
-		_, subnet, _ := net.ParseCIDR(cidr)
-		if subnet != nil && subnet.Contains(ip) {
-			return true
-		}
 	}
 
 	return false

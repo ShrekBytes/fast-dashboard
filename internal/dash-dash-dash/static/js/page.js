@@ -1,6 +1,6 @@
 import { setupPopovers } from './popover.js';
 import { setupMasonries } from './masonry.js';
-import { throttledDebounce, isElementVisible, openURLInNewTab } from './utils.js';
+import { throttledDebounce, isElementVisible } from './utils.js';
 
 const PAGE_CONTENT_FETCH_TIMEOUT_MS = 30000;
 const PAGE_CONTENT_RETRY_DELAY_MS = 1500;
@@ -320,66 +320,6 @@ function setupDynamicRelativeTime() {
             timeout = scheduleRepeatingUpdate();
         }, updateInterval - delta);
     });
-}
-
-function setupGroups() {
-    const groups = document.getElementsByClassName("widget-type-group");
-
-    if (groups.length == 0) {
-        return;
-    }
-
-    for (let g = 0; g < groups.length; g++) {
-        const group = groups[g];
-        const titles = group.getElementsByClassName("widget-header")[0].children;
-        const tabs = group.getElementsByClassName("widget-group-contents")[0].children;
-        let current = 0;
-
-        for (let t = 0; t < titles.length; t++) {
-            const title = titles[t];
-
-            if (title.dataset.titleUrl !== undefined) {
-                title.addEventListener("mousedown", (event) => {
-                    if (event.button != 1) {
-                        return;
-                    }
-
-                    openURLInNewTab(title.dataset.titleUrl, false);
-                    event.preventDefault();
-                });
-            }
-
-            title.addEventListener("click", () => {
-                if (t == current) {
-                    if (title.dataset.titleUrl !== undefined) {
-                        openURLInNewTab(title.dataset.titleUrl);
-                    }
-
-                    return;
-                }
-
-                for (let i = 0; i < titles.length; i++) {
-                    titles[i].classList.remove("widget-group-title-current");
-                    titles[i].setAttribute("aria-selected", "false");
-                    tabs[i].classList.remove("widget-group-content-current");
-                    tabs[i].setAttribute("aria-hidden", "true");
-                }
-
-                if (current < t) {
-                    tabs[t].dataset.direction = "right";
-                } else {
-                    tabs[t].dataset.direction = "left";
-                }
-
-                current = t;
-
-                title.classList.add("widget-group-title-current");
-                title.setAttribute("aria-selected", "true");
-                tabs[t].classList.add("widget-group-content-current");
-                tabs[t].setAttribute("aria-hidden", "false");
-            });
-        }
-    }
 }
 
 function setupLazyImages() {
@@ -754,7 +694,6 @@ async function applyContentAndSetup(pageElement, pageContentElement, html) {
         setupSearchBoxes();
         setupCollapsibleLists();
         setupCollapsibleGrids();
-        setupGroups();
         setupMasonries();
         setupDynamicRelativeTime();
         setupLazyImages();
@@ -931,8 +870,7 @@ document.addEventListener('click', async function(e) {
         widgetElement.style.pointerEvents = 'none';
         
         try {
-            const pageData = window.PAGE_DATA;
-            const base = pageData?.basePath || '';
+            const base = pageData.basePath || '';
             const response = await fetch(`${base}/api/widgets/${widgetId}/`, {
                 method: 'GET',
                 headers: { 'Accept': 'text/html' }

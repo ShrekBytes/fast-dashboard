@@ -3,8 +3,8 @@ package dashdashdash
 import (
 	"crypto/tls"
 	"encoding/json"
-	"encoding/xml"
 	"errors"
+
 	"fmt"
 	"io"
 	"net/http"
@@ -77,45 +77,6 @@ func decodeJsonFromRequest[T any](client requestDoer, request *http.Request) (T,
 func decodeJsonFromRequestTask[T any](client requestDoer) func(*http.Request) (T, error) {
 	return func(request *http.Request) (T, error) {
 		return decodeJsonFromRequest[T](client, request)
-	}
-}
-
-func decodeXmlFromRequest[T any](client requestDoer, request *http.Request) (T, error) {
-	var result T
-
-	response, err := client.Do(request)
-	if err != nil {
-		return result, err
-	}
-	defer response.Body.Close()
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return result, err
-	}
-
-	if response.StatusCode != http.StatusOK {
-		truncatedBody, _ := limitStringLength(string(body), 256)
-
-		return result, fmt.Errorf(
-			"unexpected status code %d for %s, response: %s",
-			response.StatusCode,
-			request.URL,
-			truncatedBody,
-		)
-	}
-
-	err = xml.Unmarshal(body, &result)
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
-}
-
-func decodeXmlFromRequestTask[T any](client requestDoer) func(*http.Request) (T, error) {
-	return func(request *http.Request) (T, error) {
-		return decodeXmlFromRequest[T](client, request)
 	}
 }
 

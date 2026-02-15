@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log/slog"
@@ -44,18 +46,43 @@ func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-// gzipMiddleware adds gzip compression for compressible responses
+var gzipWriterPool = sync.Pool{
+	New: func() any {
+		gz, _ := gzip.NewWriterLevel(nil, gzip.DefaultCompression)
+		return gz
+	},
+}
+
+// isCompressiblePath returns true if the request path should be gzip-compressed.
+// Skips already-compressed binary assets (images, fonts, etc.).
+func isCompressiblePath(path string) bool {
+	if strings.HasPrefix(path, "/static/") {
+		// Only compress text-based static assets
+		if strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".svg") {
+			return true
+		}
+		return false
+	}
+	return true
+}
+
+// gzipMiddleware adds gzip compression for compressible text responses.
+// Skips binary assets (images, fonts) that are already compressed.
 func gzipMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check if client accepts gzip
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		// Check if client accepts gzip and the path is compressible
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || !isCompressiblePath(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// Create gzip writer
-		gz := gzip.NewWriter(w)
-		defer gz.Close()
+		// Get pooled gzip writer
+		gz := gzipWriterPool.Get().(*gzip.Writer)
+		gz.Reset(w)
+		defer func() {
+			gz.Close()
+			gzipWriterPool.Put(gz)
+		}()
 
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Vary", "Accept-Encoding")
@@ -294,8 +321,18 @@ func (a *application) handlePageContentRequest(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// ETag: hash the rendered content so browsers can skip re-parsing unchanged pages
+	contentBytes := responseBytes.Bytes()
+	hash := sha256.Sum256(contentBytes)
+	etag := `"` + hex.EncodeToString(hash[:8]) + `"`
+	w.Header().Set("ETag", etag)
 	w.Header().Set("Cache-Control", "private, no-store")
-	w.Write(responseBytes.Bytes())
+
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+	} else {
+		w.Write(contentBytes)
+	}
 
 	// Refresh widget data in the background so the next request gets fresh data (stale-while-revalidate).
 	p := page
@@ -408,7 +445,7 @@ func (a *application) runBackgroundRefresh(ctx context.Context) {
 }
 
 func (a *application) refreshAllPages() {
-	for _, page := range a.slugToPage {
+	for _, pg := range a.slugToPage {
 		func(p *page) {
 			defer func() {
 				if x := recover(); x != nil {
@@ -418,7 +455,7 @@ func (a *application) refreshAllPages() {
 			p.mu.Lock()
 			defer p.mu.Unlock()
 			p.updateOutdatedWidgets()
-		}(page)
+		}(pg)
 	}
 }
 
@@ -483,11 +520,12 @@ func (a *application) server() (func() error, func() error) {
 	handler := gzipMiddleware(mux)
 
 	server := http.Server{
-		Addr:         fmt.Sprintf("%s:%d", a.Config.Server.Host, a.Config.Server.Port),
-		Handler:      handler,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:              fmt.Sprintf("%s:%d", a.Config.Server.Host, a.Config.Server.Port),
+		Handler:           handler,
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	refreshCtx, refreshCancel := context.WithCancel(context.Background())

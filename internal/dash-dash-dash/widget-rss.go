@@ -241,7 +241,7 @@ func (widget *rssWidget) fetchItemsFromFeedTask(ctx context.Context, request rss
 		return nil, fmt.Errorf("unexpected status code %d from %s", resp.StatusCode, request.URL)
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 5*1024*1024))
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +282,7 @@ func (widget *rssWidget) fetchItemsFromFeedTask(ctx context.Context, request rss
 				var link string
 
 				if len(item.Link) > 0 && item.Link[0] == '/' {
-				link = item.Link
+					link = item.Link
 				} else {
 					link = "/" + item.Link
 				}

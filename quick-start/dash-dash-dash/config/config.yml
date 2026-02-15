@@ -176,10 +176,10 @@ pages:
             limit: 8
             collapse-after: -1          # -1 = no collapse
             feeds:
-              - url: https://hnrss.org/frontpage
-                title: Hacker News
-                limit: 8
-          
+              - url: http://feeds.feedburner.com/ign/games-all
+                title: IGN
+                limit: 7
+                
           # ───────────────────────────────────────────────────────────────────
           # RSS feed in list layout (click title to refresh)
           - type: rss
@@ -211,8 +211,8 @@ pages:
 #       columns: [...]
 #
 # 🔐 Use Environment Variables:
-#   ${ENV_VAR}                    # Standard environment variable
-#   ${secret:secret_name}         # Docker/Kubernetes secret
+#   \${ENV_VAR}                   # Standard environment variable
+#   \${secret:secret_name}        # Docker/Kubernetes secret
 #
 # 📚 See full config reference: quick-start/config.example.full.yml
 #
