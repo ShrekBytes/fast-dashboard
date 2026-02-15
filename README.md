@@ -1,6 +1,6 @@
-> Minimal, blazing-fast dashboard for your homelab or new-tab page
+Minimal, blazing-fast dashboard for your homelab or new-tab page
 
-**Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
+> **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
 
 A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Glance is more feature-rich and definitely better, but this one is just fast and minimal.
 
