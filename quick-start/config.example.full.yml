@@ -1,103 +1,244 @@
-# DASH-DASH-DASH – full configuration reference
-# Every section, widget, and parameter documented. Use as config template or docs.
-# Copy to config.yml and remove/comment what you don't need.
+# ═══════════════════════════════════════════════════════════════════════════
+# DASH-DASH-DASH — Complete Configuration Reference
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# This file documents EVERY available option. Use it as:
+#   • Configuration template (copy & customize)
+#   • Feature reference
+#   • Documentation
+#
+# Copy to config.yml and remove/comment unused sections.
+#
+# Performance Features (enabled by default):
+#   ✓ Gzip compression (60-80% bandwidth reduction)
+#   ✓ ETag support for RSS feeds (conditional requests)
+#   ✓ Weather location caching
+#   ✓ Widget preloading with resource hints
+#   ✓ Click widget titles to refresh (Weather, RSS, Monitor, IP only)
+#
+# ═══════════════════════════════════════════════════════════════════════════
 
-# -----------------------------------------------------------------------------
-# Top-level: server, document, theme, branding, pages
-# -----------------------------------------------------------------------------
+# ───────────────────────────────────────────────────────────────────────────
+# SERVER CONFIGURATION
+# ───────────────────────────────────────────────────────────────────────────
 
 server:
-  host: "0.0.0.0"              # bind address
-  port: 8080
-  base-url: http://localhost:8080   # used for links and asset URLs
-  # assets-path: /path/to/assets     # optional; files served at /assets/ (icons, etc.)
-  # proxied: false                   # optional; set if behind a reverse proxy
+  host: "0.0.0.0"                      # Bind address (0.0.0.0 = all interfaces)
+  port: 8080                           # HTTP port
+  base-url: http://localhost:8080      # External URL (for links & asset references)
+  # assets-path: /path/to/assets       # Serve custom files at /assets/ (CSS, icons, etc.)
+  # proxied: false                     # Set true if behind reverse proxy (affects logging)
+
+# ───────────────────────────────────────────────────────────────────────────
+# DOCUMENT & META
+# ───────────────────────────────────────────────────────────────────────────
 
 document:
-  # head: "<meta name=\"custom\" content=\"value\">"   # optional HTML injected into <head>
+  # Inject custom HTML into <head> (meta tags, scripts, etc.)
+  # head: |
+  #   <meta name="description" content="My Dashboard">
+  #   <meta name="theme-color" content="#1a1a2e">
+
+# ───────────────────────────────────────────────────────────────────────────
+# THEME & APPEARANCE
+# ───────────────────────────────────────────────────────────────────────────
 
 theme:
-  background-color: "240 15 9"        # HSL: hue saturation lightness (space-separated, 0–360, 0–100, 0–100)
-  primary-color: "43 50 70"
-  contrast-multiplier: 1.1
-  text-saturation-multiplier: 1.0
-  # positive-color: "120 50 50"      # optional; e.g. for success
-  # negative-color: "0 50 50"        # optional; e.g. for errors
-  # light: false                    # optional; light theme
-  # custom-css-file: https://example.com/extra.css   # optional; extra CSS URL
+  # Colors in HSL format: "hue saturation lightness"
+  # Hue: 0-360, Saturation: 0-100, Lightness: 0-100
+  background-color: "240 15 9"         # Dark blue-grey
+  primary-color: "43 50 70"            # Accent color (links, highlights)
+  contrast-multiplier: 1.1             # Increase for more contrast
+  text-saturation-multiplier: 1.0      # Text color saturation
+  
+  # Optional color overrides:
+  # positive-color: "120 50 50"        # Success states (e.g. monitor up)
+  # negative-color: "0 50 50"          # Error states (e.g. monitor down)
+  # light: false                       # Enable light theme
+  
+  # Custom CSS (URL or /assets/ path):
+  # custom-css-file: /assets/custom.css
+
+# ───────────────────────────────────────────────────────────────────────────
+# BRANDING
+# ───────────────────────────────────────────────────────────────────────────
 
 branding:
-  app-name: DASH-DASH-DASH
-  footer: "Powered by DASH-DASH-DASH" # plain text or HTML; empty or omit to hide
-  # logo-text: ""                   # optional
-  # logo-url: ""                    # optional
-  # favicon-url: ""                 # optional; /favicon.ico redirects here
-  # app-icon-url: ""                # optional
-  # app-background-color: ""        # optional
+  app-name: DASH-DASH-DASH              # Site title (appears in <title>)
+  footer: "Powered by DASH-DASH-DASH"   # Footer text or HTML (empty/omit to hide)
+  # logo-text: "DASH"                    # Text logo
+  # logo-url: /assets/logo.svg           # Logo image URL
+  # favicon-url: /assets/favicon.ico     # Favicon (/favicon.ico redirects here)
+  # app-icon-url: /assets/icon.png       # PWA icon
+  # app-background-color: "#1a1a2e"      # PWA background color
 
-# Variables: in any string use $ { ENV_NAME } (no spaces), or secret:name, or readFileFromEnv:ENV_NAME. Escape as \ before $
-# Includes: - $include: path/to/file.yml   (relative to this file; recursion limit 20)
+# ───────────────────────────────────────────────────────────────────────────
+# VARIABLES & INCLUDES
+# ───────────────────────────────────────────────────────────────────────────
+#
+# Environment Variables:
+#   ${ENV_VAR_NAME}              — Standard environment variable
+#   ${secret:secret_name}        — Docker/Kubernetes secret
+#   ${readFileFromEnv:FILE_PATH} — Read file path from env variable
+#
+# Include Files:
+#   - $include: path/to/file.yml — Merge external YAML (relative paths, max depth 20)
+#
+# Escape $ with backslash: \${not_a_variable}
+# ───────────────────────────────────────────────────────────────────────────
 
-# -----------------------------------------------------------------------------
-# Pages: name, slug, layout, columns, widgets
-# -----------------------------------------------------------------------------
+# ───────────────────────────────────────────────────────────────────────────
+# VARIABLES & INCLUDES
+# ───────────────────────────────────────────────────────────────────────────
+#
+# Environment Variables:
+#   ${ENV_VAR_NAME}              — Standard environment variable
+#   ${secret:secret_name}        — Docker/Kubernetes secret
+#   ${readFileFromEnv:FILE_PATH} — Read file path from env variable
+#
+# Include Files:
+#   - $include: path/to/file.yml — Merge external YAML (relative paths, max depth 20)
+#
+# Escape $ with backslash: \${not_a_variable}
+# ───────────────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PAGES
+# ═══════════════════════════════════════════════════════════════════════════
 
 pages:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Main Page (Root URL)
+  # ─────────────────────────────────────────────────────────────────────────
+  
   - name: Home
-    slug: ""                          # empty = root URL /
-    hide-desktop-navigation: true      # hide top nav (e.g. single page)
-    center-vertically: true
+    slug: ""                           # Empty string = root URL (/)
+    
+    # Layout options:
+    hide-desktop-navigation: true      # Hide top navigation bar
+    center-vertically: true            # Center content vertically
     width: default                     # default | wide | slim
-    # desktop-navigation-width: wide   # wide | slim (nav bar)
-    # show-mobile-header: true
-    # head-widgets: []                 # optional widgets in page head
+    # desktop-navigation-width: wide   # Navigation bar width (wide | slim)
+    # show-mobile-header: true         # Show header on mobile
+    
+    # Optional widgets displayed above columns (full width):
+    # head-widgets:
+    #   - type: search
+    #     autofocus: true
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # COLUMNS
+    # ─────────────────────────────────────────────────────────────────────────
+    
     columns:
+      # ═══════════════════════════════════════════════════════════════════════
+      # SIDEBAR — Small column for compact widgets
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: small                    # small | full
         widgets:
-          # -------- Clock --------
+        
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # CLOCK — Display current time with multiple timezones
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: None (client-side JavaScript)
+          # Refresh: Not available (real-time updates)
+          
           - type: clock
-            # title: Clock             # optional; default "Clock"
-            hour-format: 24h           # 12h | 24h
-            timezones:                 # optional extra timezones
+            title: Clock                # Optional, default: "Clock"
+            hour-format: 24h            # 12h | 24h
+            
+            # Optional: Show additional timezones
+            timezones:
               - timezone: America/New_York
                 label: New York
               - timezone: Europe/London
                 label: London
-            # hide-header: false
-            # css-class: ""
-            # cache: 0                  # optional override (duration: 1m, 5m, 1h, etc.)
-
-          # -------- Calendar --------
+              - timezone: Asia/Tokyo
+                label: Tokyo
+            
+            # Common widget options:
+            # hide-header: false        # Hide widget title
+            # css-class: my-custom-class
+            # cache: 0                  # Override cache duration (e.g. 5m, 1h)
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # CALENDAR — Monthly calendar view
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: None (client-side JavaScript)
+          # Refresh: Not available (real-time updates)
+          
           - type: calendar
-            first-day-of-week: monday  # monday | tuesday | ... | sunday
-
-          # -------- Weather --------
+            title: Calendar
+            first-day-of-week: monday   # monday | tuesday | ... | sunday
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # WEATHER — Current weather & forecast from Open-Meteo
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: On the hour (updates at :00 minutes)
+          # Refresh: ✓ Click title to refresh (location lookups cached)
+          # API: Open-Meteo (no API key required)
+          
           - type: weather
-            location: City, Country  # or "City, Area, Country"
+            location: London, UK        # "City, Country" or "City, Region, Country"
             units: metric               # metric | imperial
-            hour-format: 12h            # 12h | 24h
-            hide-location: false
-            show-area-name: false
-
-          # -------- IP Address --------
+            hour-format: 24h            # 12h | 24h
+            hide-location: false        # Hide location name
+            show-area-name: false       # Show region/area in location
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # IP ADDRESS — Show public IP and local network interfaces
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: 10 minutes
+          # Refresh: ✓ Click title to refresh
+          
           - type: ip-address
-            # omit public-url = default (ipinfo.io, IP + country). Set to "" to hide public IP.
-            # public-url: "https://api.ipify.org"   # plain-text IP only (country from 2nd request)
-            # interfaces: [wlo1, eth0]             # optional: only show these interface labels
-
-          # -------- To-Do --------
+            title: IP Address
+            
+            # Public IP options:
+            # - Omit public-url = use default (ipinfo.io with country)
+            # - Set to "" to hide public IP
+            # - Set custom URL for plain-text IP only
+            # public-url: "https://api.ipify.org"
+            
+            # Optional: Show only specific network interfaces
+            # interfaces: [wlo1, eth0, enp0s31f6]
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # TO-DO — Simple task list with localStorage
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: None (localStorage only)
+          # Refresh: Not available (client-side only)
+          
           - type: to-do
-            id: main                   # localStorage key; use different ids for separate lists
-
+            title: To-Do
+            id: main                    # localStorage key (use different IDs for separate lists)
+      
+      # ═══════════════════════════════════════════════════════════════════════
+      # MAIN CONTENT — Full-width column for primary widgets
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: full
         widgets:
-          # -------- Search / URL bar --------
+        
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # SEARCH — Search engine with bangs and direct URL navigation
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: None (client-side form)
+          # Refresh: Not available
+          
           - type: search
-            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity | kagi | startpage | or URL with {QUERY}
+            title: Search
+            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity | kagi | startpage
+            # Or custom URL with {QUERY} placeholder:
+            # search-engine: https://search.brave.com/search?q={QUERY}
+            
             placeholder: "Search or enter URL…"
-            autofocus: true
-            new-tab: false
-            target: "_blank"
+            autofocus: true             # Auto-focus on page load
+            new-tab: false              # Open results in new tab
+            target: "_blank"            # Link target attribute
+            
+            # Search bangs (shortcuts):
             bangs:
               - shortcut: "!yt"
                 title: YouTube
@@ -105,79 +246,185 @@ pages:
               - shortcut: "!w"
                 title: Wikipedia
                 url: https://en.wikipedia.org/wiki/Special:Search?search={QUERY}
-
-          # -------- Service Monitor --------
+              - shortcut: "!gh"
+                title: GitHub
+                url: https://github.com/search?q={QUERY}
+              - shortcut: "!so"
+                title: Stack Overflow
+                url: https://stackoverflow.com/search?q={QUERY}
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # MONITOR — Service health monitoring with uptime tracking
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: 5 minutes (60 seconds when internet is down)
+          # Refresh: ✓ Click title to refresh
+          # Features: Internet connectivity detection, local network handling
+          
           - type: monitor
             title: Services
-            style: ""                  # "" | compact
-            show-failing-only: false   # true = only show failing sites
-            show-internet-status: false # true = show internet connectivity at top
+            style: ""                   # "" (default) | compact
+            show-failing-only: false    # Show only failing services
+            show-internet-status: true  # Show internet connectivity at top
+            
             sites:
-              - title: My App
+              - title: My Application
                 url: http://localhost:3000
-                icon: si:docker       # si: | di: | mdi: | sh: or full URL
-                same-tab: false
-                # check-url: "http://localhost:3000/health"   # URL used for health check (default: url)
-                # allow-insecure: true                       # skip TLS verify
-                # timeout: 7s                                # 7s default; format: 1s, 5s, 1m, 1h
-                # error-url: "http://localhost:3000/status"   # link when down
-                # alt-status-codes: [301, 302]               # treat as success
+                icon: si:docker         # SimpleIcons (si:), DevIcons (di:), Material Design (mdi:), or URL
+                same-tab: false         # Open in same tab instead of new tab
+                
+                # Optional health check overrides:
+                # check-url: http://localhost:3000/health   # Use different URL for health check
+                # allow-insecure: true                      # Skip TLS certificate verification
+                # timeout: 7s                               # Request timeout (default: 7s)
+                # error-url: http://localhost:3000/status   # Link to status page when down
+                # alt-status-codes: [301, 302, 307]         # Additional success codes
+                
+                # Optional authentication:
                 # basic-auth:
                 #   username: admin
-                #   password: from Docker secret (e.g. secret:monitor_password)
-
-          # -------- Bookmarks --------
+                #   password: ${secret:monitor_password}
+              
+              - title: PostgreSQL
+                url: http://localhost:5432
+                icon: si:postgresql
+              
+              - title: Redis
+                url: http://localhost:6379
+                icon: si:redis
+              
+              - title: Production API
+                url: https://api.example.com
+                icon: si:fastapi
+                check-url: https://api.example.com/health
+                timeout: 10s
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # BOOKMARKS — Organized bookmark groups with icons
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: None (static config)
+          # Refresh: Not available
+          
           - type: bookmarks
             title: Bookmarks
+            
             groups:
-              - title: General
-                # color: "200 60 50"  # optional HSL; omit for default
-                same-tab: false
-                # hide-arrow: false
-                # target: "_blank"
+              - title: Development
+                color: "200 60 50"      # Optional HSL color for group
+                same-tab: false         # Default for all links in group
+                # hide-arrow: false     # Hide arrow icon
+                # target: "_blank"      # Link target
+                
                 links:
-                  - title: Gmail
-                    url: https://mail.google.com
-                    icon: ""            # empty = favicon; or si:gmail, URL, etc.
-                    # description: ""
-                    # same-tab: false    # per-link override
-                    # hide-arrow: false
-                    # target: "_blank"
-
-          # -------- RSS --------
+                  - title: GitHub
+                    url: https://github.com
+                    icon: si:github     # SimpleIcons prefix or URL (empty = favicon)
+                    description: Code hosting
+                    # same-tab: true    # Override group setting
+                    # hide-arrow: true  # Override group setting
+                  
+                  - title: GitLab
+                    url: https://gitlab.com
+                    icon: si:gitlab
+                  
+                  - title: Stack Overflow
+                    url: https://stackoverflow.com
+                    icon: si:stackoverflow
+              
+              - title: Social
+                links:
+                  - title: Reddit
+                    url: https://reddit.com
+                    icon: si:reddit
+                  
+                  - title: YouTube
+                    url: https://youtube.com
+                    icon: si:youtube
+                  
+                  - title: Twitter
+                    url: https://twitter.com
+                    icon: si:x
+              
+              - title: News
+                links:
+                  - title: Hacker News
+                    url: https://news.ycombinator.com
+                    icon: si:ycombinator
+                  
+                  - title: BBC News
+                    url: https://www.bbc.com/news
+                    icon: si:bbc
+                  
+                  - title: TechCrunch
+                    url: https://techcrunch.com
+                    icon: si:techcrunch
+          
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # RSS — Aggregate RSS/Atom feeds with multiple layout styles
+          # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          # Cache: 2 hours per feed
+          # Refresh: ✓ Click title to refresh (with ETag support)
+          # Features: ETag/Last-Modified conditional requests, bandwidth optimization
+          
           - type: rss
-            title: News
-            style: list                 # list | vertical-list | detailed-list | horizontal-cards | horizontal-cards-2
-            limit: 25
-            collapse-after: 5           # -1 to disable collapse
-            preserve-order: false       # true = keep feed order instead of newest first
-            single-line-titles: false
-            # thumbnail-height: 0       # optional
-            # card-height: 0            # optional
+            title: News Feed
+            
+            # Layout styles:
+            # - list                  : Compact vertical list
+            # - vertical-list         : Spaced vertical list
+            # - detailed-list         : List with descriptions
+            # - horizontal-cards      : Scrollable cards (1 row)
+            # - horizontal-cards-2    : Scrollable cards (2 rows)
+            style: list
+            
+            # Options:
+            limit: 25                   # Total items to show (0 = unlimited)
+            collapse-after: 5           # Collapse after N items (-1 = no collapse)
+            preserve-order: false       # Keep feed order (don't sort by date)
+            single-line-titles: false   # Truncate titles to single line
+            # thumbnail-height: 10      # Card image height in rem
+            # card-height: 0            # Fixed card height (0 = auto)
+            
             feeds:
-              - url: https://example.com/feed.xml
-                title: ""               # optional override for feed name
-                limit: 0                # per-feed limit; 0 = use widget limit
-                hide-categories: false
-                hide-description: false
-                # item-link-prefix: ""  # optional prefix for item links
-                # headers: {}           # optional HTTP headers, e.g. Authorization
-
+              - url: https://hnrss.org/frontpage
+                title: Hacker News      # Optional: Override feed title
+                limit: 10               # Per-feed limit (0 = use widget limit)
+                hide-categories: false  # Hide item categories/tags
+                hide-description: false # Hide item descriptions
+                # item-link-prefix: ""  # Prefix for item URLs
+                # headers:              # Custom HTTP headers
+                #   Authorization: Bearer ${API_TOKEN}
+              
+              - url: https://www.reddit.com/r/programming/.rss
+                title: r/programming
+                limit: 10
+              
+              - url: https://feeds.arstechnica.com/arstechnica/index
+                title: Ars Technica
+                limit: 5
+      
+      # ═══════════════════════════════════════════════════════════════════════
+      # ADDITIONAL SIDEBAR — Another small column (optional)
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: small
         widgets:
           - type: rss
             title: Side Feed
             style: horizontal-cards
             limit: 8
-            collapse-after: -1
+            collapse-after: -1          # No collapse
             feeds:
-              - url: https://example.com/feed.xml
-                limit: 5
-
-  # Second page (optional)
+              - url: https://xkcd.com/rss.xml
+                title: XKCD
+  
+  # ─────────────────────────────────────────────────────────────────────────
+  # Additional Page Example (optional multi-page setup)
+  # ─────────────────────────────────────────────────────────────────────────
+  
   - name: Feeds
-    slug: feeds
-    hide-desktop-navigation: false
+    slug: feeds                         # Accessible at /feeds
+    hide-desktop-navigation: false      # Show navigation
+    
     columns:
       - size: full
         widgets:
@@ -186,8 +433,19 @@ pages:
             style: detailed-list
             limit: 50
             preserve-order: true
+            collapse-after: 15
             feeds:
-              - url: https://example.com/a.xml
-              - url: https://example.com/b.xml
-                title: Custom Title
+              - url: https://blog.golang.org/feed.atom
+                title: Go Blog
+              
+              - url: https://github.blog/feed/
+                title: GitHub Blog
+              
+              - url: https://dev.to/feed
+                title: DEV Community
+
+# ═══════════════════════════════════════════════════════════════════════════
+# END OF CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+
 

@@ -1,5 +1,18 @@
-# DASH-DASH-DASH - minimal config example
-# Copy to config.yml and customize
+# ═══════════════════════════════════════════════════════════════════════════
+# DASH-DASH-DASH — Starter Configuration
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# This is a minimal, ready-to-use configuration. Customize as needed!
+#
+# 📚 Full configuration reference: quick-start/config.example.full.yml
+# 📖 Documentation: https://github.com/shrekbytes/dash-dash-dash
+#
+# Performance features enabled by default:
+#   ✓ Gzip compression (60-80% bandwidth reduction)
+#   ✓ Smart caching with ETag support
+#   ✓ Click widget titles to refresh (Weather, RSS, Monitor, IP)
+#
+# ═══════════════════════════════════════════════════════════════════════════
 
 server:
   host: "0.0.0.0"
@@ -8,122 +21,204 @@ server:
 
 branding:
   app-name: DASH-DASH-DASH
-  # Footer text or HTML (e.g. links); leave empty or omit to hide footer
-  footer: "ShrekBytes"
+  footer: "Powered by DASH-DASH-DASH"
+  # footer: ""  # Set empty to hide footer
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PAGE LAYOUT
+# ═══════════════════════════════════════════════════════════════════════════
 
 pages:
   - name: Home
     hide-desktop-navigation: true
     center-vertically: true
+    
     columns:
+      # ═══════════════════════════════════════════════════════════════════════
+      # SIDEBAR — Compact widgets
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: small
         widgets:
+          # ───────────────────────────────────────────────────────────────────
+          # Show current time in 12-hour format
           - type: clock
             hour-format: 12h
-
-          # - type: calendar
-          #   first-day-of-week: saturday
-
+            # Add more timezones if needed:
+            # timezones:
+            #   - timezone: America/New_York
+            #     label: New York
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Monthly calendar view
+          - type: calendar
+            first-day-of-week: monday
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Weather widget (click title to refresh)
+          # Change location to your city
           - type: weather
-            location: Dhaka, Bangladesh
-            units: metric
+            location: London, UK
+            units: metric               # metric | imperial
             hour-format: 12h
-
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Show public IP and local network interfaces
+          # Click title to refresh IP information
           - type: ip-address
-            # omit public-url = use default (show public IP); set to "" to hide
-            # interfaces: [wlo1, eth0]  # optional: filter by interface names
-
+            # Uncomment to hide public IP:
+            # public-url: ""
+            # Uncomment to show only specific interfaces:
+            # interfaces: [eth0, wlo1]
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Simple to-do list (saved in browser localStorage)
           - type: to-do
-            id: main
-
+            id: main                    # Use different IDs for multiple lists
+      
+      # ═══════════════════════════════════════════════════════════════════════
+      # MAIN CONTENT — Full-width widgets
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: full
         widgets:
+          # ───────────────────────────────────────────────────────────────────
+          # Search bar with URL navigation
           - type: search
-            search-engine: duckduckgo
+            search-engine: duckduckgo   # duckduckgo | google | bing | perplexity
             placeholder: "Search or enter URL…"
             autofocus: true
-
+            # Add search shortcuts:
+            # bangs:
+            #   - shortcut: "!yt"
+            #     title: YouTube
+            #     url: https://www.youtube.com/results?search_query={QUERY}
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Service monitoring (click title to refresh)
+          # Shows green/red status with uptime history
           - type: monitor
             title: Services
-            show-internet-status: true
+            show-internet-status: true  # Show internet connectivity
             sites:
-              - title: Vaultwarden
-                url: http://localhost:80
-                icon: si:vaultwarden
-              - title: Google
-                url: https://google.com
-                icon: si:google
-              - title: Gitea
-                url: http://localhost:3000
-                icon: si:gitea
-              - title: Jellyfin
-                url: http://localhost:8096
-                icon: si:jellyfin
-              - title: Home Assistant
-                url: http://localhost:8123
-                icon: si:homeassistant
-              - title: Grafana
-                url: http://localhost:3001
-                icon: si:grafana
-              - title: Prometheus
-                url: http://localhost:9090
-                icon: si:prometheus
+              - title: Router
+                url: http://192.168.1.1
+                icon: si:router
+              
+              - title: Pi-hole
+                url: http://192.168.1.2
+                icon: si:pihole
+              
               - title: Portainer
                 url: http://localhost:9000
                 icon: si:docker
-
-
+              
+              # Example with custom health check:
+              # - title: My App
+              #   url: http://localhost:3000
+              #   check-url: http://localhost:3000/health
+              #   icon: si:fastapi
+          
+          # ───────────────────────────────────────────────────────────────────
+          # Organized bookmark groups
           - type: bookmarks
-            title: Bookmarks
+            title: Quick Links
             groups:
-              - title: General
+              - title: Development
+                links:
+                  - title: GitHub
+                    url: https://github.com
+                    icon: si:github
+                  
+                  - title: Stack Overflow
+                    url: https://stackoverflow.com
+                    icon: si:stackoverflow
+                  
+                  - title: MDN
+                    url: https://developer.mozilla.org
+                    icon: si:mdnwebdocs
+              
+              - title: Media
+                links:
+                  - title: YouTube
+                    url: https://youtube.com
+                    icon: si:youtube
+                  
+                  - title: Reddit
+                    url: https://reddit.com
+                    icon: si:reddit
+                  
+                  - title: Netflix
+                    url: https://netflix.com
+                    icon: si:netflix
+              
+              - title: Productivity
                 links:
                   - title: Gmail
                     url: https://mail.google.com
-                  - title: GitHub
-                    url: https://github.com
-                  - title: Wikipedia
-                    url: https://en.wikipedia.org
-                  - title: DuckDuckGo
-                    url: https://duckduckgo.com
-              - title: News
-                links:
-                  - title: Arch News
-                    url: https://archlinux.org/news/
-                  - title: Hacker News
-                    url: https://news.ycombinator.com
-                  - title: BBC News
-                    url: https://www.bbc.com/news
-              - title: Dev & Docs
-                links:
-                  - title: Go Docs
-                    url: https://go.dev/doc
-                  - title: MDN
-                    url: https://developer.mozilla.org
-                  - title: Stack Overflow
-                    url: https://stackoverflow.com
-              - title: Social
-                links:
-                  - title: Reddit
-                    url: https://www.reddit.com
-                  - title: YouTube
-                    url: https://www.youtube.com
-
+                    icon: si:gmail
+                  
+                  - title: Google Drive
+                    url: https://drive.google.com
+                    icon: si:googledrive
+                  
+                  - title: Notion
+                    url: https://notion.so
+                    icon: si:notion
+      
+      # ═══════════════════════════════════════════════════════════════════════
+      # ADDITIONAL SIDEBAR — RSS feeds
+      # ═══════════════════════════════════════════════════════════════════════
+      
       - size: small
         widgets:
+          # ───────────────────────────────────────────────────────────────────
+          # RSS feed in horizontal card layout (click title to refresh)
+          # Change feed URL to your preferred source
           - type: rss
-            title: Movies
+            title: Tech News
             style: horizontal-cards
             limit: 8
+            collapse-after: -1          # -1 = no collapse
             feeds:
-              - url: https://moviesmod.town/feed/
+              - url: https://hnrss.org/frontpage
+                title: Hacker News
                 limit: 8
-        
+          
+          # ───────────────────────────────────────────────────────────────────
+          # RSS feed in list layout (click title to refresh)
           - type: rss
-            title: News
+            title: Latest Posts
             style: list
             limit: 10
-            collapse-after: 5
+            collapse-after: 5           # Show "see more" after 5 items
             feeds:
-              - url: https://archlinux.org/feeds/news/
-                title: Arch Linux
+              - url: https://blog.golang.org/feed.atom
+                title: Go Blog
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CUSTOMIZATION TIPS
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# 🎨 Change Theme:
+#   Add under theme:
+#     background-color: "240 15 9"  # HSL: hue (0-360) saturation (0-100) lightness (0-100)
+#     primary-color: "43 50 70"     # Accent color for links & highlights
+#
+# 🔍 More Search Engines:
+#   search-engine: google | bing | perplexity | kagi | startpage
+#   Or use custom URL: https://search.brave.com/search?q={QUERY}
+#
+# 📱 Add More Pages:
+#   Create multiple pages with different slugs:
+#     - name: Feeds
+#       slug: feeds               # Access at /feeds
+#       columns: [...]
+#
+# 🔐 Use Environment Variables:
+#   ${ENV_VAR}                    # Standard environment variable
+#   ${secret:secret_name}         # Docker/Kubernetes secret
+#
+# 📚 See full config reference: quick-start/config.example.full.yml
+#
+# ═══════════════════════════════════════════════════════════════════════════
