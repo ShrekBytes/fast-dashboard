@@ -3,6 +3,7 @@
 {{ define "document-title" }}{{ .Page.Title }}{{ end }}
 
 {{ define "document-head-after" }}
+<link rel="preload" href="{{ if .App.Config.Server.BasePath }}{{ .App.Config.Server.BasePath }}{{ end }}/api/pages/{{ .Page.Slug }}/content/" as="fetch" crossorigin>
 <script type="module" src='{{ .App.StaticAssetPath "js/page.js" }}'></script>
 {{ end }}
 

@@ -2,8 +2,10 @@ package dashdashdash
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -26,6 +28,42 @@ var (
 const STATIC_ASSETS_CACHE_DURATION = 24 * time.Hour
 
 var reservedPageSlugs = []string{"login", "logout"}
+
+// gzipResponseWriter wraps http.ResponseWriter to add gzip compression
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+	written bool
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	if !w.written {
+		w.Header().Del("Content-Length")
+		w.written = true
+	}
+	return w.Writer.Write(b)
+}
+
+// gzipMiddleware adds gzip compression for compressible responses
+func gzipMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if client accepts gzip
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// Create gzip writer
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Vary", "Accept-Encoding")
+
+		gzw := &gzipResponseWriter{Writer: gz, ResponseWriter: w}
+		next.ServeHTTP(gzw, r)
+	})
+}
 
 type application struct {
 	Version   string
@@ -293,8 +331,56 @@ func (a *application) handleNotFound(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("Page not found"))
 }
 
+func (a *application) findWidgetByID(id uint64) (widget, *page) {
+	for _, page := range a.slugToPage {
+		for _, w := range page.HeadWidgets {
+			if w.GetID() == id {
+				return w, page
+			}
+		}
+		for _, col := range page.Columns {
+			for _, w := range col.Widgets {
+				if w.GetID() == id {
+					return w, page
+				}
+			}
+		}
+	}
+	return nil, nil
+}
+
 func (a *application) handleWidgetRequest(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	// Parse widget ID from URL
+	widgetIDStr := r.PathValue("widget")
+	var widgetID uint64
+	_, err := fmt.Sscanf(widgetIDStr, "%d", &widgetID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid widget ID"))
+		return
+	}
+
+	// Find the widget
+	widget, page := a.findWidgetByID(widgetID)
+	if widget == nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Widget not found"))
+		return
+	}
+
+	// Update the widget with a timeout context
+	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	defer cancel()
+
+	page.mu.Lock()
+	widget.update(ctx)
+	html := widget.Render()
+	page.mu.Unlock()
+
+	// Return the rendered widget HTML
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "private, no-store")
+	w.Write([]byte(html))
 }
 
 const backgroundRefreshInterval = 5 * time.Minute
@@ -381,9 +467,12 @@ func (a *application) server() (func() error, func() error) {
 		mux.Handle("/assets/{path...}", http.StripPrefix("/assets/", assetsFS))
 	}
 
+	// Wrap mux with gzip compression middleware
+	handler := gzipMiddleware(mux)
+
 	server := http.Server{
 		Addr:    fmt.Sprintf("%s:%d", a.Config.Server.Host, a.Config.Server.Port),
-		Handler: mux,
+		Handler: handler,
 	}
 
 	refreshCtx, refreshCancel := context.WithCancel(context.Background())

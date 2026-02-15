@@ -35,6 +35,10 @@ type ipAddrLine struct {
 	Value string
 }
 
+func (widget *ipAddressWidget) IsRefreshable() bool {
+	return true
+}
+
 func (widget *ipAddressWidget) initialize() error {
 	widget.withTitle("IP Address").withError(nil)
 	// When public-url is omitted (nil), use default so public IP is shown. Set to "" to hide, or to a URL to use that endpoint.

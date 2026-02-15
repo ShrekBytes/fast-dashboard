@@ -800,3 +800,163 @@ async function setupPage() {
 }
 
 setupPage();
+
+// Setup functions to run after widget refresh
+function setupRefreshedWidget(widgetElement) {
+    // Setup lazy images within the refreshed widget
+    const images = widgetElement.querySelectorAll("img[loading=lazy]");
+    for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (image.complete) {
+            image.classList.add("cached", "finished-transition");
+        } else {
+            image.addEventListener("load", () => {
+                image.classList.add("loaded");
+                setTimeout(() => image.classList.add("finished-transition"), 400);
+            });
+        }
+    }
+
+    // Setup carousels within the refreshed widget
+    const carouselElements = widgetElement.querySelectorAll(".carousel-container");
+    for (let i = 0; i < carouselElements.length; i++) {
+        const carousel = carouselElements[i];
+        carousel.classList.add("show-right-cutoff");
+        const itemsContainer = carousel.querySelector(".carousel-items-container");
+        if (!itemsContainer) continue;
+
+        const determineSideCutoffs = () => {
+            if (itemsContainer.scrollLeft != 0) {
+                carousel.classList.add("show-left-cutoff");
+            } else {
+                carousel.classList.remove("show-left-cutoff");
+            }
+            if (Math.ceil(itemsContainer.scrollLeft) + itemsContainer.clientWidth < itemsContainer.scrollWidth) {
+                carousel.classList.add("show-right-cutoff");
+            } else {
+                carousel.classList.remove("show-right-cutoff");
+            }
+        };
+        const determineSideCutoffsRateLimited = throttledDebounce(determineSideCutoffs, 20, 100);
+        itemsContainer.addEventListener("scroll", determineSideCutoffsRateLimited);
+        window.addEventListener("resize", determineSideCutoffsRateLimited);
+        afterContentReady(determineSideCutoffs);
+    }
+
+    // Setup collapsible lists within the refreshed widget
+    const collapsibleLists = widgetElement.querySelectorAll(".list.collapsible-container");
+    for (let i = 0; i < collapsibleLists.length; i++) {
+        const list = collapsibleLists[i];
+        if (list.dataset.collapseAfter === undefined) continue;
+        const collapseAfter = parseInt(list.dataset.collapseAfter);
+        if (collapseAfter == -1 || list.children.length <= collapseAfter) continue;
+        
+        attachExpandToggleButton(list);
+        for (let c = collapseAfter; c < list.children.length; c++) {
+            const child = list.children[c];
+            child.classList.add("collapsible-item");
+            child.style.animationDelay = ((c - collapseAfter) * 20).toString() + "ms";
+        }
+    }
+
+    // Setup collapsible grids within the refreshed widget
+    const collapsibleGridElements = widgetElement.querySelectorAll(".cards-grid.collapsible-container");
+    for (let i = 0; i < collapsibleGridElements.length; i++) {
+        const gridElement = collapsibleGridElements[i];
+        if (gridElement.dataset.collapseAfterRows === undefined) continue;
+        const collapseAfterRows = parseInt(gridElement.dataset.collapseAfterRows);
+        if (collapseAfterRows == -1) continue;
+
+        const getCardsPerRow = () => parseInt(getComputedStyle(gridElement).getPropertyValue('--cards-per-row'));
+        const button = attachExpandToggleButton(gridElement);
+        let cardsPerRow;
+
+        const resolveCollapsibleItems = () => requestAnimationFrame(() => {
+            const hideItemsAfterIndex = cardsPerRow * collapseAfterRows;
+            if (hideItemsAfterIndex >= gridElement.children.length) {
+                button.style.display = "none";
+            } else {
+                button.style.removeProperty("display");
+            }
+            let row = 0;
+            for (let i = 0; i < gridElement.children.length; i++) {
+                const child = gridElement.children[i];
+                if (i >= hideItemsAfterIndex) {
+                    child.classList.add("collapsible-item");
+                    child.style.animationDelay = (row * 40).toString() + "ms";
+                    if (i % cardsPerRow + 1 == cardsPerRow) row++;
+                } else {
+                    child.classList.remove("collapsible-item");
+                    child.style.removeProperty("animation-delay");
+                }
+            }
+        });
+
+        const observer = new ResizeObserver(() => {
+            if (!isElementVisible(gridElement)) return;
+            const newCardsPerRow = getCardsPerRow();
+            if (cardsPerRow == newCardsPerRow) return;
+            cardsPerRow = newCardsPerRow;
+            resolveCollapsibleItems();
+        });
+
+        cardsPerRow = getCardsPerRow();
+        resolveCollapsibleItems();
+        afterContentReady(() => observer.observe(gridElement));
+    }
+
+    // Setup dynamic relative time within the refreshed widget
+    const relativeTimeElements = widgetElement.querySelectorAll("[data-dynamic-relative-time]");
+    if (relativeTimeElements.length > 0) {
+        updateRelativeTimeForElements(relativeTimeElements);
+    }
+
+    // Re-run global setup that's safe to call multiple times
+    setupPopovers();
+    setupMasonries();
+}
+
+// Widget click-to-refresh handler
+document.addEventListener('click', async function(e) {
+    const target = e.target.closest('.widget-refresh-title');
+    if (target && target.dataset.widgetId) {
+        e.preventDefault();
+        const widgetId = target.dataset.widgetId;
+        const widgetElement = target.closest('.widget');
+        
+        if (!widgetElement) return;
+        
+        // Add loading state
+        widgetElement.style.opacity = '0.5';
+        widgetElement.style.pointerEvents = 'none';
+        
+        try {
+            const pageData = window.PAGE_DATA;
+            const base = pageData?.basePath || '';
+            const response = await fetch(`${base}/api/widgets/${widgetId}/`, {
+                method: 'GET',
+                headers: { 'Accept': 'text/html' }
+            });
+            
+            if (response.ok) {
+                const html = await response.text();
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const newWidget = tempDiv.firstElementChild;
+                
+                if (newWidget) {
+                    widgetElement.replaceWith(newWidget);
+                    setupRefreshedWidget(newWidget);
+                }
+            } else {
+                console.error('Failed to refresh widget:', response.status);
+                widgetElement.style.opacity = '1';
+                widgetElement.style.pointerEvents = '';
+            }
+        } catch (err) {
+            console.error('Error refreshing widget:', err);
+            widgetElement.style.opacity = '1';
+            widgetElement.style.pointerEvents = '';
+        }
+    }
+});

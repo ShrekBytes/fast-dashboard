@@ -3,6 +3,8 @@
     <div class="widget-header">
         {{- if ne "" .TitleURL }}
         <h2><a href="{{ .TitleURL | safeURL }}" target="_blank" rel="noreferrer" class="uppercase">{{ .Title }}</a></h2>
+        {{- else if .IsRefreshable }}
+        <h2 class="uppercase widget-refresh-title" data-widget-id="{{ .ID }}">{{ .Title }}</h2>
         {{- else }}
         <h2 class="uppercase">{{ .Title }}</h2>
         {{- end }}

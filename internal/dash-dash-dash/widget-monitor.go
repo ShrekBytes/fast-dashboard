@@ -13,6 +13,21 @@ import (
 	"time"
 )
 
+// Helper functions for worker pool sizing
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 const uptimeHistoryMaxEntries = 10
 
 var uptimeHistory = newUptimeHistoryStore(uptimeHistoryMaxEntries)
@@ -83,7 +98,9 @@ type monitorWidget struct {
 	InternetStatus      *siteStatus `yaml:"-"`
 	InternetAvailable   bool        `yaml:"-"`
 }
-
+func (widget *monitorWidget) IsRefreshable() bool {
+	return true
+}
 func (widget *monitorWidget) initialize() error {
 	widget.withTitle("Monitor").withCacheDuration(5 * time.Minute)
 	// Determine which sites are local
@@ -297,7 +314,9 @@ func fetchSiteStatusTask(statusRequest *SiteStatusRequest) (siteStatus, error) {
 }
 
 func fetchStatusForSites(requests []*SiteStatusRequest) ([]siteStatus, error) {
-	job := newJob(fetchSiteStatusTask, requests).withWorkers(20)
+	// Scale workers dynamically: 1-20 based on site count
+	workerCount := minInt(20, maxInt(1, len(requests)))
+	job := newJob(fetchSiteStatusTask, requests).withWorkers(workerCount)
 	results, _, err := workerPoolDo(job)
 	if err != nil {
 		return nil, err
@@ -325,16 +344,25 @@ func checkInternetConnectivity() bool {
 		return internetAvailable
 	}
 
-	// Try multiple privacy-focused endpoints
+	// Try multiple privacy-focused endpoints using HTTP HEAD (reuses connections)
 	endpoints := []string{
-		"1.1.1.1:443",   // Cloudflare DNS
-		"9.9.9.9:443",   // Quad9 DNS
+		"https://1.1.1.1",      // Cloudflare
+		"https://dns.quad9.net", // Quad9
 	}
 
 	for _, endpoint := range endpoints {
-		conn, err := net.DialTimeout("tcp", endpoint, 7*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+		req, err := http.NewRequestWithContext(ctx, http.MethodHead, endpoint, nil)
+		if err != nil {
+			cancel()
+			continue
+		}
+		
+		resp, err := defaultHTTPClient.Do(req)
+		cancel()
+		
 		if err == nil {
-			conn.Close()
+			resp.Body.Close()
 			internetAvailable = true
 			lastInternetCheck = time.Now()
 			return true

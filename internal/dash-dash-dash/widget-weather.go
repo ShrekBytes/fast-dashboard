@@ -18,19 +18,24 @@ import (
 var weatherWidgetTemplate = mustParseTemplate("weather.html", "widget-base.html")
 
 type weatherWidget struct {
-	widgetBase   `yaml:",inline"`
-	Location     string                      `yaml:"location"`
-	ShowAreaName bool                        `yaml:"show-area-name"`
-	HideLocation bool                        `yaml:"hide-location"`
-	HourFormat   string                      `yaml:"hour-format"`
-	Units        string                      `yaml:"units"`
-	Place        *openMeteoPlaceResponseJson `yaml:"-"`
-	Weather      *weather                    `yaml:"-"`
-	TimeLabels   [12]string                  `yaml:"-"`
+	widgetBase     `yaml:",inline"`
+	Location       string                      `yaml:"location"`
+	ShowAreaName   bool                        `yaml:"show-area-name"`
+	HideLocation   bool                        `yaml:"hide-location"`
+	HourFormat     string                      `yaml:"hour-format"`
+	Units          string                      `yaml:"units"`
+	Place          *openMeteoPlaceResponseJson `yaml:"-"`
+	Weather        *weather                    `yaml:"-"`
+	TimeLabels     [12]string                  `yaml:"-"`
+	cachedLocation *openMeteoPlaceResponseJson // Persistent cache across restarts
 }
 
 var timeLabels12h = [12]string{"2am", "4am", "6am", "8am", "10am", "12pm", "2pm", "4pm", "6pm", "8pm", "10pm", "12am"}
 var timeLabels24h = [12]string{"02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "00:00"}
+
+func (widget *weatherWidget) IsRefreshable() bool {
+	return true
+}
 
 func (widget *weatherWidget) initialize() error {
 	widget.withTitle("Weather").withCacheOnTheHour()
@@ -57,14 +62,20 @@ func (widget *weatherWidget) initialize() error {
 }
 
 func (widget *weatherWidget) update(ctx context.Context) {
+	// Use cached location if available
 	if widget.Place == nil {
-		place, err := fetchOpenMeteoPlaceFromName(widget.Location)
-		if err != nil {
-			widget.withError(err).scheduleEarlyUpdate()
-			return
-		}
+		if widget.cachedLocation != nil {
+			widget.Place = widget.cachedLocation
+		} else {
+			place, err := fetchOpenMeteoPlaceFromName(widget.Location)
+			if err != nil {
+				widget.withError(err).scheduleEarlyUpdate()
+				return
+			}
 
-		widget.Place = place
+			widget.Place = place
+			widget.cachedLocation = place // Cache for future restarts
+		}
 	}
 
 	weather, err := fetchWeatherForOpenMeteoPlace(widget.Place, widget.Units)

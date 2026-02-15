@@ -45,7 +45,9 @@ type rssWidget struct {
 	cachedFeedsMutex sync.Mutex
 	cachedFeeds      map[string]*cachedRSSFeed `yaml:"-"`
 }
-
+func (widget *rssWidget) IsRefreshable() bool {
+	return true
+}
 func (widget *rssWidget) initialize() error {
 	widget.withTitle("RSS Feed").withCacheDuration(2 * time.Hour)
 
@@ -239,6 +241,10 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 		return nil, err
 	}
 
+	// Store ETag and Last-Modified headers for next request
+	etag := resp.Header.Get("ETag")
+	lastModified := resp.Header.Get("Last-Modified")
+
 	if request.Limit > 0 && len(feed.Items) > request.Limit {
 		feed.Items = feed.Items[:request.Limit]
 	}
@@ -346,17 +352,18 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 		items = append(items, rssItem)
 	}
 
-	if resp.Header.Get("ETag") != "" || resp.Header.Get("Last-Modified") != "" {
-		widget.cachedFeedsMutex.Lock()
-		widget.cachedFeeds[request.URL] = &cachedRSSFeed{
-			etag:         resp.Header.Get("ETag"),
-			lastModified: resp.Header.Get("Last-Modified"),
-			items:        items,
-		}
-		widget.cachedFeedsMutex.Unlock()
+// Update cache with ETag and Last-Modified for future conditional requests
+if etag != "" || lastModified != "" {
+	widget.cachedFeedsMutex.Lock()
+	widget.cachedFeeds[request.URL] = &cachedRSSFeed{
+		etag:         etag,
+		lastModified: lastModified,
+		items:        items,
 	}
+	widget.cachedFeedsMutex.Unlock()
+}
 
-	return items, nil
+return items, nil
 }
 
 func findThumbnailInItemExtensions(item *gofeed.Item) string {

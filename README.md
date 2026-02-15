@@ -10,6 +10,16 @@ A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/gl
 
 ---
 
+## ⚡ Performance Features
+
+- **Gzip Compression** — Automatic response compression (60-80% bandwidth reduction)
+- **Smart Caching** — ETag support for RSS feeds, location caching for weather
+- **Widget Preloading** — Resource hints for faster page loads
+- **Manual Refresh** — Click widget titles to refresh individual widgets (no page reload)
+- **Intelligent Monitoring** — Internet connectivity detection with local network handling
+
+---
+
 ## Quick Links
 
 **[Configuration Examples](quick-start/config.example.full.yml)** • **[Widget Reference](#widgets)** • **[Installation](#installation)**
@@ -569,6 +579,23 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 
 ## Advanced
 
+### Widget Manual Refresh
+
+Widgets that fetch external data (Weather, RSS, Monitor, IP Address) support click-to-refresh. Simply click the widget title to refresh that widget without reloading the entire page.
+
+**Refreshable widgets:**
+- **Weather** — Updates current weather and forecast
+- **RSS** — Fetches latest feed items
+- **Monitor** — Checks service status
+- **IP Address** — Updates IP information
+
+**Non-refreshable widgets:**
+- Clock, Calendar, Search, To-Do, Bookmarks (static or client-side only)
+
+Refreshable widget titles show hover effects (pointer cursor and color change) to indicate interactivity.
+
+---
+
 ### Custom CSS & Assets
 
 Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
@@ -692,10 +719,16 @@ curl http://localhost:8080/api/healthz
 # Returns 200 OK when app is healthy
 ```
 
-**Widget data:**
+**Page content:**
 ```
-GET /api/pages/{page-slug}/content
+GET /api/pages/{page-slug}/content/
 ```
+
+**Widget refresh:**
+```
+GET /api/widgets/{widget-id}/
+```
+Returns updated HTML for a specific widget. Used by the client-side manual refresh feature.
 
 ---
 
@@ -703,13 +736,19 @@ GET /api/pages/{page-slug}/content
 
 | Widget | Cache Duration | Notes |
 |--------|----------------|-------|
-| Weather | On the hour | Updates at :00 minutes |
+| Weather | On the hour | Updates at :00 minutes, caches location lookups |
 | Monitor | 5 minutes | 60 seconds when internet is down |
-| RSS | 2 hours | Per feed |
+| RSS | 2 hours | Per feed, supports ETag/Last-Modified for bandwidth saving |
 | IP Address | 10 minutes | |
 | Clock, Calendar, To-Do | No cache | Real-time or client-side |
 
 **Static assets:** 24-hour cache (CSS, JS, images)
+
+**Performance optimizations:**
+- All HTTP responses compressed with gzip (60-80% bandwidth reduction)
+- RSS feeds use conditional requests (ETag/Last-Modified headers)
+- Weather widget caches geocoding results
+- Widget data preloaded via resource hints for faster page loads
 
 Widget data refreshes in background after page requests and on server startup.
 

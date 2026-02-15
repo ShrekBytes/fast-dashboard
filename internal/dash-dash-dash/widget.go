@@ -89,6 +89,7 @@ type widget interface {
 	Render() template.HTML
 	GetType() string
 	GetID() uint64
+	IsRefreshable() bool
 
 	initialize() error
 	requiresUpdate(*time.Time) bool
@@ -155,6 +156,10 @@ func (w *widgetBase) GetID() uint64 {
 
 func (w *widgetBase) setID(id uint64) {
 	w.ID = id
+}
+
+func (w *widgetBase) IsRefreshable() bool {
+	return false
 }
 
 func (w *widgetBase) setHideHeader(value bool) {
