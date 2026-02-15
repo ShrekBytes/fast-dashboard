@@ -559,7 +559,9 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 
 **Cache:** 2 hours.
 
----
+
+##
+
 
 ## Advanced
 
@@ -573,12 +575,9 @@ Widgets that fetch external data (Weather, RSS, Monitor, IP Address) support cli
 - **Monitor** — Checks service status
 - **IP Address** — Updates IP information
 
-**Non-refreshable widgets:**
-- Clock, Calendar, Search, To-Do, Bookmarks (static or client-side only)
+Refreshable widget titles show hover effects (pointer cursor and color change) to indicate.
 
-Refreshable widget titles show hover effects (pointer cursor and color change) to indicate interactivity.
-
----
+###
 
 ### Custom CSS & Assets
 
@@ -591,13 +590,7 @@ Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
    mkdir ~/dash-dash-dash/assets
    ```
 
-2. Add custom CSS:
-   ```css
-   /* ~/dash-dash-dash/assets/user.css */
-   .widget-bookmarks { border-radius: 12px; }
-   ```
-
-3. Reference in config:
+2. Reference in config:
    ```yaml
    theme:
      custom-css-file: /assets/user.css
@@ -607,7 +600,7 @@ Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
      logo-url: /assets/logo.png
    ```
 
-4. Mount with Docker:
+3. Mount with Docker:
    ```yaml
    # docker-compose.yml
    volumes:
@@ -616,7 +609,7 @@ Serve custom files (CSS, images, icons) from the `/assets/` endpoint.
 
 **Supported files:** CSS, images (PNG, JPG, SVG, WebP, GIF, ICO), fonts
 
----
+###
 
 ### Environment Variables
 
@@ -649,51 +642,12 @@ API_URL=https://api.example.com
 API_USER=admin
 ```
 
-**Docker secrets:**
-```yaml
-# References /run/secrets/api_password
-password: ${secret:api_password}
-```
-
 **Read file from env path:**
 ```yaml
 certificate: ${readFileFromEnv:CERT_PATH}
 ```
 
-**Escape literal `$`:**
-```yaml
-literal_value: \${not-a-variable}
-```
-
----
-
-### CLI Commands
-
-```bash
-# Specify config file
-./dash-dash-dash -config /path/to/config.yml
-
-# Validate config
-./dash-dash-dash config:validate
-
-# Print merged config (with includes resolved)
-./dash-dash-dash config:print
-
-# Run diagnostics
-./dash-dash-dash diagnose
-
-# Show version
-./dash-dash-dash version
-./dash-dash-dash --version
-./dash-dash-dash -v
-```
-
-**Docker:**
-```bash
-docker exec dash-dash-dash /app/dash-dash-dash config:validate
-```
-
----
+###
 
 ### API Endpoints
 
@@ -714,7 +668,7 @@ GET /api/widgets/{widget-id}/
 ```
 Returns updated HTML for a specific widget. Used by the client-side manual refresh feature.
 
----
+###
 
 ### Caching Behavior
 
@@ -728,28 +682,13 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 
 **Static assets:** 24-hour cache (CSS, JS, images)
 
-**Performance optimizations:**
-- All HTTP responses compressed with gzip (60-80% bandwidth reduction)
-- RSS feeds use conditional requests (ETag/Last-Modified headers)
-- Weather widget caches geocoding results
-- Widget data preloaded via resource hints for faster page loads
 
-Widget data refreshes in background after page requests and on server startup.
+##
 
----
 
 ## Troubleshooting
 
 ### Common Issues
-
-**Port already in use**
-```
-Error: bind: address already in use
-```
-- Change `server.port` in config.yml (e.g., `8081`)
-- Check for conflicting services: `sudo lsof -i :8080`
-
----
 
 **Config changes not appearing**
 - Ensure you're editing the correct file (mounted at `/app/config/config.yml` in containers)
@@ -757,13 +696,13 @@ Error: bind: address already in use
 - Check logs for syntax errors: `docker logs dash-dash-dash`
 - Validate config: `./dash-dash-dash config:validate`
 
----
+###
 
 **.env changes not applied**
 - Restart the container: `docker compose restart`
 - Environment variables are loaded at startup only
 
----
+###
 
 **Config syntax errors**
 ```bash
@@ -774,7 +713,7 @@ Error: bind: address already in use
 ./dash-dash-dash config:print
 ```
 
----
+###
 
 **Service monitor shows all services as down**
 - Check network mode: Use `--network host` for localhost access
@@ -782,7 +721,7 @@ Error: bind: address already in use
 - Check firewall rules
 - For local services, use `host.docker.internal` instead of `localhost` (Mac/Windows)
 
----
+###
 
 **RSS feeds not loading**
 - Verify feed URLs in browser
@@ -796,44 +735,27 @@ Error: bind: address already in use
         User-Agent: "Mozilla/5.0"
   ```
 
----
+###
 
 **Slow performance**
-- Reduce RSS feed count or increase cache duration
+- Reduce RSS feed count
 - Use `style: list` instead of `horizontal-cards` for RSS (skips image extraction)
 - Check monitor widget site count and timeouts
-- Monitor system resources (CPU/memory)
 - Check logs for slow API responses
 
----
-
-**Monitor widget shows "Unknown"**
-- Internet connectivity check failed (tests 1.1.1.1 and dns.quad9.net)
-- Local network sites still checked when internet is down
-- Verify `check-url` if using custom health endpoints
-- Enable `allow-insecure: true` for self-signed certificates
-
----
-- Check if feeds require authentication (`headers` parameter)
-- Some feeds block server requests—try different feeds
-- Review logs: `docker logs dash-dash-dash`
-
----
+###
 
 **Custom CSS not loading**
 - Verify assets folder is mounted: `-v ~/dash-dash-dash/assets:/app/assets:ro`
 - Check file path in config: `/assets/user.css` (not `~/dash-dash-dash/assets/...`)
 - Ensure file permissions allow reading
-- Clear browser cache
 
----
+###
 
 **Weather widget not working**
 - Verify location format: `"City, Country"` (e.g., `"London, UK"`)
 - Check Open-Meteo service status
 - Try different city name variations
-
----
 
 ### Debug Mode
 
@@ -849,30 +771,26 @@ docker logs -f dash-dash-dash
 ./dash-dash-dash  # Logs to stdout
 ```
 
----
 
 ### Getting Help
 
 1. Check [quick-start/config.example.full.yml](quick-start/config.example.full.yml) for examples
 2. Validate config: `./dash-dash-dash config:validate`
 3. Review logs for error messages
-4. Open an issue on GitHub with:
-   - Config snippet (redact sensitive data)
-   - Log output
-   - Steps to reproduce
+4. Open an issue on GitHub
 
----
+##
 
 ## License
 
-**AGPL-3.0** — See [LICENSE](LICENSE)
+**GNU GPL-3.0** [LICENSE](LICENSE)
 
 Based on [Glance](https://github.com/glanceapp/glance) by **glanceapp**.  
 Weather data: [Open-Meteo](https://open-meteo.com/) (no API key required).  
 Icons: [DuckDuckGo Icons](https://icons.duckduckgo.com/), [SimpleIcons](https://simpleicons.org/).  
 Font: [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
 
----
+##
 
-**Built with ❤️ for homelabs and minimalists.**
+**Built with ❤️ for minimalists.**
 
