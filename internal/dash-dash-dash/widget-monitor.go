@@ -22,10 +22,14 @@ var uptimeHistory = newUptimeHistoryStore(uptimeHistoryMaxEntries)
 
 // Internet connectivity state
 var (
-	internetAvailableMu    sync.RWMutex
-	internetAvailable      bool = true
-	lastInternetCheck      time.Time
-	internetCheckCacheSecs = 10 // Cache internet status for 10 seconds
+	internetAvailableMu        sync.RWMutex
+	internetAvailable          bool = true
+	lastInternetCheck          time.Time
+	internetCheckCacheSecs     = 10             // Cache internet status for 10 seconds when up
+	internetCheckCacheSecsFail = 3              // Cache for only 3 seconds when down for faster recovery
+	appStartTime               = time.Now()
+	startupGracePeriod         = 2 * time.Second // Wait for network to stabilize on startup
+	startupGraceOnce           sync.Once         // Ensure startup delay happens only once
 )
 
 type uptimeHistoryStore struct {
@@ -386,54 +390,106 @@ func fetchStatusForSites(requests []*SiteStatusRequest) ([]siteStatus, error) {
 	return results, nil
 }
 
-// checkInternetConnectivity checks if internet is available
-// Uses cached result if checked recently
+// checkInternetConnectivity checks if internet is available with retry logic
+// Uses cached result if checked recently, with adaptive cache duration
 func checkInternetConnectivity() bool {
 	internetAvailableMu.RLock()
-	if time.Since(lastInternetCheck) < time.Duration(internetCheckCacheSecs)*time.Second {
+	// Use shorter cache duration when internet was down to detect recovery faster
+	cacheDuration := time.Duration(internetCheckCacheSecs) * time.Second
+	if !internetAvailable {
+		cacheDuration = time.Duration(internetCheckCacheSecsFail) * time.Second
+	}
+	if time.Since(lastInternetCheck) < cacheDuration {
 		result := internetAvailable
 		internetAvailableMu.RUnlock()
 		return result
 	}
 	internetAvailableMu.RUnlock()
 
+	// Startup grace period: wait outside the lock to avoid blocking other goroutines
+	startupGraceOnce.Do(func() {
+		if time.Since(appStartTime) < startupGracePeriod {
+			time.Sleep(startupGracePeriod - time.Since(appStartTime))
+		}
+	})
+
 	// Need to check - upgrade to write lock
 	internetAvailableMu.Lock()
 	defer internetAvailableMu.Unlock()
 
 	// Double-check after acquiring write lock
-	if time.Since(lastInternetCheck) < time.Duration(internetCheckCacheSecs)*time.Second {
+	if !internetAvailable {
+		cacheDuration = time.Duration(internetCheckCacheSecsFail) * time.Second
+	} else {
+		cacheDuration = time.Duration(internetCheckCacheSecs) * time.Second
+	}
+	if time.Since(lastInternetCheck) < cacheDuration {
 		return internetAvailable
 	}
 
-	// Try multiple privacy-focused endpoints using HTTP HEAD (reuses connections)
-	endpoints := []string{
-		"https://1.1.1.1",      // Cloudflare
-		"https://dns.quad9.net", // Quad9
-	}
-
-	for _, endpoint := range endpoints {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		req, err := http.NewRequestWithContext(ctx, http.MethodHead, endpoint, nil)
-		if err != nil {
-			cancel()
-			continue
-		}
-		
-		resp, err := defaultHTTPClient.Do(req)
-		cancel() // Always cancel context to free resources
-		
-		if err == nil {
-			resp.Body.Close()
-			internetAvailable = true
-			lastInternetCheck = time.Now()
-			return true
-		}
-	}
-
-	// All checks failed - internet is down
-	internetAvailable = false
+	// Check internet with retry logic and parallel endpoint testing
+	isUp := performInternetConnectivityCheck()
+	
+	internetAvailable = isUp
 	lastInternetCheck = time.Now()
+	return isUp
+}
+
+// performInternetConnectivityCheck tests multiple endpoints with retry logic
+func performInternetConnectivityCheck() bool {
+	// Privacy-focused endpoints - test in parallel for speed
+	endpoints := []string{
+		"https://1.1.1.1",       // Cloudflare DNS
+		"https://dns.quad9.net", // Quad9 DNS
+		"https://8.8.8.8",       // Google DNS (fallback)
+	}
+
+	// Try twice with a short delay between attempts to handle transient failures
+	for attempt := 0; attempt < 2; attempt++ {
+		if attempt > 0 {
+			time.Sleep(500 * time.Millisecond) // Brief pause before retry
+		}
+
+		// Check endpoints in parallel for speed
+		type result struct {
+			success bool
+			endpoint string
+		}
+		resultChan := make(chan result, len(endpoints))
+		
+		for _, endpoint := range endpoints {
+			go func(ep string) {
+				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				defer cancel()
+				
+				req, err := http.NewRequestWithContext(ctx, http.MethodGet, ep, nil)
+				if err != nil {
+					resultChan <- result{success: false, endpoint: ep}
+					return
+				}
+				
+				resp, err := defaultHTTPClient.Do(req)
+				if err != nil {
+					resultChan <- result{success: false, endpoint: ep}
+					return
+				}
+				// Close body immediately without reading to minimize data transfer
+				resp.Body.Close()
+				resultChan <- result{success: true, endpoint: ep}
+			}(endpoint)
+		}
+
+		// Wait for first successful response or all to fail
+		for i := 0; i < len(endpoints); i++ {
+			res := <-resultChan
+			if res.success {
+				// Internet is up! Return immediately
+				return true
+			}
+		}
+	}
+
+	// All attempts failed - internet is down
 	return false
 }
 
