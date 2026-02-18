@@ -1,7 +1,7 @@
 {{ template "widget-base.html" . }}
 
 {{ define "widget-content" }}
-<div class="scraper-widget">
+<div class="dynamic-columns list-gap-24 list-with-separator">
     {{ range .ScrapedData }}
     <div class="scraper-item{{ if .Error }} scraper-item-error{{ end }}">
         {{ if and $.ShowItemTitles .Title }}
