@@ -652,7 +652,7 @@ Generic web scraper for extracting values from server-side rendered websites usi
 - `[data-price]` — Element with attribute "data-price"
 - `.product:first-child` — First element with class "product"
 
-**Cache:** 15 minutes (configurable).
+**Cache:** 30 minutes (configurable).
 
 **Notes:**
 - Only works with server-side rendered HTML (not JavaScript-heavy SPAs)
@@ -780,7 +780,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 | Weather | On the hour | Updates at :00 minutes, caches location lookups |
 | Monitor | 5 minutes | 60 seconds when internet is down |
 | RSS | 2 hours | Per feed, supports ETag/Last-Modified for bandwidth saving |
-| Scraper | 15 minutes | configurable |
+| Scraper | 30 minutes | configurable |
 | IP Address | 10 minutes | |
 | Clock, Calendar, To-Do | No cache | Real-time or client-side |
 

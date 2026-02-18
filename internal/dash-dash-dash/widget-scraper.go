@@ -49,7 +49,7 @@ func (widget *scraperWidget) IsRefreshable() bool {
 }
 
 func (widget *scraperWidget) initialize() error {
-	widget.withTitle("Scraper").withCacheDuration(15 * time.Minute)
+	widget.withTitle("Scraper").withCacheDuration(30 * time.Minute)
 
 	if len(widget.Items) == 0 {
 		return fmt.Errorf("at least one item is required")
@@ -90,7 +90,7 @@ func (widget *scraperWidget) Render() template.HTML {
 func (widget *scraperWidget) scrapeItems(ctx context.Context) ([]scraperResult, error) {
 	job := newJob(func(item scraperItem) (scraperResult, error) {
 		return widget.scrapeItemTask(ctx, item)
-	}, widget.Items).withWorkers(10)
+	}, widget.Items).withWorkers(3)
 
 	results, errs, err := workerPoolDo(job)
 	if err != nil {
@@ -120,6 +120,9 @@ func (widget *scraperWidget) scrapeItems(ctx context.Context) ([]scraperResult, 
 }
 
 func (widget *scraperWidget) scrapeItemTask(ctx context.Context, item scraperItem) (scraperResult, error) {
+	// Rate limiting: delay between requests to avoid overwhelming servers
+	time.Sleep(1 * time.Second)
+
 	result := scraperResult{
 		Title:      item.Title,
 		URL:        item.URL,
