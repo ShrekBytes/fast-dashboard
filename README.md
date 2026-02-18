@@ -603,7 +603,6 @@ Generic web scraper for extracting values from server-side rendered websites usi
   title: Web Scraper
   single-line: false            # Display all values in a single line
   show-item-titles: true        # Show item titles (auto-enabled for multiple items)
-  cache: 15m                    # Cache duration (default: 15 minutes)
   items:
     - title: Product Price
       url: https://example.com/product
@@ -632,7 +631,6 @@ Generic web scraper for extracting values from server-side rendered websites usi
 **Parameters:**
 - `single-line` — Display all selector values on a single line (default: `false`)
 - `show-item-titles` — Show titles for each item (default: auto-enabled for multiple items)
-- `cache` — Cache duration (default: 15 minutes)
 - `items` — List of pages to scrape (required)
 
 **Per-Item Options:**
@@ -782,6 +780,7 @@ Returns updated HTML for a specific widget. Used by the client-side manual refre
 | Weather | On the hour | Updates at :00 minutes, caches location lookups |
 | Monitor | 5 minutes | 60 seconds when internet is down |
 | RSS | 2 hours | Per feed, supports ETag/Last-Modified for bandwidth saving |
+| Scraper | 15 minutes | configurable |
 | IP Address | 10 minutes | |
 | Clock, Calendar, To-Do | No cache | Real-time or client-side |
 
