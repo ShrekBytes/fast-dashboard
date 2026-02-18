@@ -1,0 +1,36 @@
+{{ template "widget-base.html" . }}
+
+{{ define "widget-content" }}
+<div class="scraper-widget">
+    {{ range .ScrapedData }}
+    <div class="scraper-item{{ if .Error }} scraper-item-error{{ end }}">
+        {{ if and $.ShowItemTitles .Title }}
+        <div class="scraper-item-title">
+            {{ if .URL }}
+            <a href="{{ .URL | safeURL }}" target="_blank" rel="noreferrer" class="size-h5 color-subdue">{{ .Title }}</a>
+            {{ else }}
+            <span class="size-h5 color-subdue">{{ .Title }}</span>
+            {{ end }}
+        </div>
+        {{ end }}
+        
+        {{ if .Error }}
+        <div class="scraper-error color-negative size-h5">
+            <svg class="scraper-error-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            {{ .Error }}
+        </div>
+        {{ else if .Values }}
+        <div class="scraper-values{{ if .SingleLine }} scraper-values-single-line{{ end }}">
+            {{ range .Values }}
+            <span class="scraper-value">{{ . }}</span>
+            {{ end }}
+        </div>
+        {{ else }}
+        <div class="scraper-no-data color-subdue size-h5">No data found</div>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

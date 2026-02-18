@@ -1,0 +1,80 @@
+.scraper-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: var(--padding-inline-widget);
+}
+
+.scraper-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scraper-item:not(:last-child) {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-separator);
+}
+
+.scraper-item-title {
+    margin-bottom: 0.25rem;
+}
+
+.scraper-item-title a {
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.scraper-item-title a:hover {
+    color: var(--color-highlight);
+}
+
+.scraper-values {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scraper-values-single-line {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.scraper-value {
+    font-size: var(--size-h3);
+    color: var(--color-highlight);
+    font-weight: 500;
+}
+
+.scraper-values-single-line .scraper-value {
+    font-size: var(--size-h4);
+}
+
+.scraper-values-single-line .scraper-value:not(:last-child)::after {
+    content: "•";
+    margin-left: 0.75rem;
+    color: var(--color-subdue);
+    font-weight: 400;
+}
+
+.scraper-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scraper-error-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: var(--color-negative);
+}
+
+.scraper-no-data {
+    font-style: italic;
+}
+
+/* Error state styling */
+.scraper-item-error {
+    opacity: 0.8;
+}

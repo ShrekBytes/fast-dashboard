@@ -42,6 +42,8 @@ func newWidget(widgetType string) (widget, error) {
 		w = &bookmarksWidget{}
 	case "rss":
 		w = &rssWidget{}
+	case "scraper":
+		w = &scraperWidget{}
 	default:
 		return nil, fmt.Errorf("unknown widget type: %s", widgetType)
 	}

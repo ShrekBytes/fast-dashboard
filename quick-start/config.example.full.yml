@@ -393,6 +393,42 @@ pages:
               
               - url: https://dev.to/feed
                 title: DEV Community
+          
+          # ───────────────────────────────────────────────────────────────────
+          # SCRAPER WIDGET
+          # ───────────────────────────────────────────────────────────────────
+          # Generic web scraper - extract values from any HTML page using CSS
+          # selectors. Perfect for tracking prices, stats, or any SSR content.
+          # ───────────────────────────────────────────────────────────────────
+          
+          - type: scraper
+            title: Web Scraper
+            single-line: false
+            cache: 10m
+            items:
+              # Example: Track GitHub repository stats
+              - title: dash-dash-dash Stars
+                url: https://github.com/ShrekBytes/dash-dash-dash
+                selectors:
+                  - selector: "#repo-stars-counter-star"
+                    suffix: " ⭐"
+              
+              # Example: Extract multiple values from one page
+              - title: Product Info
+                url: https://example.com/product
+                selectors:
+                  - selector: ".price"
+                    prefix: "$"
+                  - selector: ".stock-count"
+                    suffix: " in stock"
+              
+              # Example: Extract link href attribute
+              - title: Latest Release
+                url: https://example.com/downloads
+                selectors:
+                  - selector: "a.download-link"
+                    attr: "href"
+                    prefix: "🔗 "
 
 # ═══════════════════════════════════════════════════════════════════════════
 # END OF CONFIGURATION

@@ -23,3 +23,6 @@ Thumbs.db
 *.tmp
 .env
 .env.*
+
+# Test files
+/test/

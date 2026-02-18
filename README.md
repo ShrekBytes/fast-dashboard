@@ -1,6 +1,6 @@
 ## DASH-DASH-DASH (Minimal, blazing-fast dashboard)
 
-> **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Service Monitoring
+> **Features:** Clock • Weather • Search • Bookmarks • To-Do • RSS • Web Scraper • Service Monitoring
 
 A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/glance). Glance is more feature-rich and definitely better, but this one is just fast and minimal.
 
@@ -36,6 +36,7 @@ A lightweight, stripped-down version of [Glance](https://github.com/glanceapp/gl
   - [Monitor](#monitor)
   - [Bookmarks](#bookmarks)
   - [RSS](#rss)
+  - [Scraper](#scraper)
 - [Advanced](#advanced)
   - [Widget Manual Refresh](#widget-manual-refresh)
   - [Custom CSS & Assets](#custom-css--assets)
@@ -593,6 +594,79 @@ RSS/Atom feed reader with multiple display styles and aggregation.
 ###
 
 
+### Scraper
+
+Generic web scraper for extracting values from server-side rendered websites using CSS selectors. Perfect for tracking prices, download counts, statistics, or any other data from HTML pages.
+
+```yaml
+- type: scraper
+  title: Web Scraper
+  single-line: false            # Display all values in a single line
+  show-item-titles: true        # Show item titles (auto-enabled for multiple items)
+  cache: 15m                    # Cache duration (default: 15 minutes)
+  items:
+    - title: Product Price
+      url: https://example.com/product
+      selectors:
+        - selector: ".price"
+          prefix: "$"
+          suffix: " USD"
+        - selector: ".discount"
+          prefix: "Save "
+          suffix: "%"
+    
+    - title: GitHub Stars
+      url: https://github.com/username/repo
+      selectors:
+        - selector: "#repo-stars-counter-star"
+          suffix: " ⭐"
+    
+    - title: Download Link
+      url: https://example.com/downloads
+      selectors:
+        - selector: "a.download-btn"
+          attr: "href"          # Extract attribute instead of text
+          prefix: "🔗 "
+```
+
+**Parameters:**
+- `single-line` — Display all selector values on a single line (default: `false`)
+- `show-item-titles` — Show titles for each item (default: auto-enabled for multiple items)
+- `cache` — Cache duration (default: 15 minutes)
+- `items` — List of pages to scrape (required)
+
+**Per-Item Options:**
+- `title` — Display name for this item (optional)
+- `url` — Page URL to scrape (required)
+- `selectors` — List of CSS selectors to extract (required)
+
+**Per-Selector Options:**
+- `selector` — CSS selector (e.g., `.price`, `#count`, `div.stats > span`) (required)
+- `prefix` — Text to prepend to extracted value (optional)
+- `suffix` — Text to append to extracted value (optional)
+- `attr` — Extract attribute instead of text content (e.g., `href`, `src`, `data-value`) (optional)
+
+**Selector Examples:**
+- `.price` — Element with class "price"
+- `#count` — Element with ID "count"
+- `span.value` — `<span>` with class "value"
+- `div.container > p` — Direct child `<p>` of `div.container`
+- `[data-price]` — Element with attribute "data-price"
+- `.product:first-child` — First element with class "product"
+
+**Cache:** 15 minutes (configurable).
+
+**Notes:**
+- Only works with server-side rendered HTML (not JavaScript-heavy SPAs)
+- Each selector extracts the first matching element from the page
+- Values are automatically trimmed and whitespace-normalized
+- Failed items show error messages without breaking other items
+- Uses jQuery-like CSS selector syntax via goquery
+
+
+###
+
+
 ## Advanced
 
 ### Widget Manual Refresh
@@ -602,6 +676,7 @@ Widgets that fetch external data (Weather, RSS, Monitor, IP Address) support cli
 **Refreshable widgets:**
 - **Weather** — Updates current weather and forecast
 - **RSS** — Fetches latest feed items
+- **Scraper** — Fetches latest scraped values
 - **Monitor** — Checks service status
 - **IP Address** — Updates IP information
 
