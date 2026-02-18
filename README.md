@@ -660,6 +660,7 @@ Generic web scraper for extracting values from server-side rendered websites usi
 - Values are automatically trimmed and whitespace-normalized
 - Failed items show error messages without breaking other items
 - Uses jQuery-like CSS selector syntax via goquery
+- Rate limited to ~3 requests per second per widget to avoid overwhelming servers
 
 
 ###
