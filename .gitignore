@@ -2,7 +2,7 @@
 /dash-dash-dash
 *.exe
 
-# Local config (may contain secrets)
+# Local config 
 config/config.yml
 
 # IDE and OS
@@ -23,6 +23,4 @@ Thumbs.db
 *.tmp
 .env
 .env.*
-
-# Test files
 /test/
